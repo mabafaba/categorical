@@ -40,12 +40,12 @@ new_select_multiple<-function(x = character(), choices = NULL, labels = NULL, se
   })
   attributes(x_split)$choices<-choices
   # class(x_split)<-c('select_multiple')
-  vctrs::new_vctr(x_split, class = "odk_select_multiple", labels = labels)
+  vctrs::new_vctr(x_split, class = "cat_select_multiple", labels = labels)
 
 }
 
 
-format.odk_select_multiple<-function(x, ...) {
+format.cat_select_multiple<-function(x, ...) {
 
   x<-purrr::map_chr(x,function(x){
     x<-as.character(x)
@@ -65,12 +65,12 @@ x
 
 # basic type functions
 
-#' check if vector is of class odk_select_multiple
+#' check if vector is of class cat_select_multiple
 #' @param x a vector
 #' @return TRUE if it is
 #' @export
 is_select_multiple<-function(x){
-  inherits(x,'odk_select_multiple')
+  inherits(x,'cat_select_multiple')
 }
 
 as_select_multiple<-select_multiple
@@ -78,17 +78,17 @@ as_select_multiple<-select_multiple
 # pretty printing
 
 
-print.odk_select_multiple<-function(x, ...) {
+print.cat_select_multiple<-function(x, ...) {
   cat(format(x), sep = "\n")
   invisible(x)
 }
 
 
-vec_ptype_abbr.odk_select_multiple <- function(x, ...) {
+vec_ptype_abbr.cat_select_multiple <- function(x, ...) {
   "s_mult"
 }
 
-pillar_shaft.odk_select_multiple<- function(x, ...) {
+pillar_shaft.cat_select_multiple<- function(x, ...) {
   out <- format(x)
   out[is.na(x)] <- NA
   pillar::new_pillar_shaft_simple(out, align = "left", na_indent = 5)
@@ -100,12 +100,12 @@ pillar_shaft.odk_select_multiple<- function(x, ...) {
 
 #' @importFrom pillar type_sum
 #' @export
-type_sum.odk_select_multiple <- function(x) {
+type_sum.cat_select_multiple <- function(x) {
   "s_mult"
 }
 
 #' @export
-as.logical.odk_select_multiple<-function(x, ...){
+as.logical.cat_select_multiple<-function(x, ...){
   categorical::spread_select_multiple(x)
 }
 
@@ -123,6 +123,6 @@ mutate_select_multiple<-function(.data,...){
   .data
 }
 
-# fct_collapse.odk_select_multiple<-function(x,...){
+# fct_collapse.cat_select_multiple<-function(x,...){
 #   as_select_multiple(lapply(x,fct_collapse,...))
 # }

@@ -12,7 +12,7 @@ label<-function(x){
 #' labels for select multiple
 #' @param x a list of class categorical_select_multiple
 #' @return same as `x`, but all values are replaced by values; lookup table for labels no longer part of attributes.
-label.odk_select_multiple<-function(x){
+label.cat_select_multiple<-function(x){
   labels<-attributes(x)$labels
   lapply(x, function(y){
     y_labeled<-as.character(y)
