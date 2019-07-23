@@ -7,11 +7,17 @@ The goal of categorical is to provide a coherent framework for representing cate
 
 ## Installation
 
+This is under development, but you can try:
+
+```
+devtools::install_github('mabafaba/categorical')
+```
 Once on CRAN, you can install the released version of categorical from [CRAN](https://CRAN.R-project.org) with:
 
 ``` r
 install.packages("categorical")
 ```
+
 
 ## Example
 
