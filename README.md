@@ -1,5 +1,7 @@
 [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/mabafaba/categorical?branch=master&svg=true)](https://ci.appveyor.com/project/mabafaba/categorical)
 
+[![CRAN status](https://www.r-pkg.org/badges/version/categorical)](https://cran.r-project.org/package=categorical)
+
 # categorical
 
 The goal of categorical is to ...
