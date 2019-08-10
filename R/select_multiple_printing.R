@@ -1,7 +1,18 @@
 
 #' @method print cat_select_multiple
 print.cat_select_multiple<-function(x, ...) {
-  cat(format.cat_select_multiple(x), sep = "; ")
+  if(length(x)==0){
+    levels_text<-levels(x)
+    if(length(levels_text)==0){
+      levels_text<-"(no levels)"
+    }else{
+      levels_text<-paste('levels:',paste0(levels_text,collapse = ' '))
+
+      }
+    cat(crayon::silver(paste0('select_multiple vector of length 0\n',levels_text)))
+    return(invisible(x))
+  }
+  cat(format.cat_select_multiple(x), sep = " ")
   invisible(x)
 }
 

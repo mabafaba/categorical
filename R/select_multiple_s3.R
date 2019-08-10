@@ -58,6 +58,9 @@ new_select_multiple.cat_select_multiple<-function(x, choices = NULL, labels = NU
 }
 
 
+new_select_multiple.NULL<-new_select_multiple.list
+
+
 #' convert to select_multiple variable
 #'
 #' @param x a character vector with concatenated select_multiple choices (for example 'c("choice_A choices_B", "choice_C")`)
@@ -143,3 +146,9 @@ mutate_select_multiple<-function(.data,...){
 # fct_collapse.cat_select_multiple<-function(x,...){
 #   as_select_multiple(lapply(x,fct_collapse,...))
 # }
+
+
+# following the vctrs vignette, adding this wihtout knowing why or what it does:
+
+#' @importFrom methods setOldClass
+methods::setOldClass(c("cat_select_multiple", "vctrs_vctr"))
