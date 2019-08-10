@@ -13,7 +13,6 @@ mutate_select_multiple(.data, ...)
 }
 \value{
 see ?dplyr::mutate
- @export
 }
 \description{
 Mutate select_multiple type variables in a data frame

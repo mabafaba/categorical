@@ -2,7 +2,7 @@ Package: categorical
 Type: Package
 Title: Representing and Manipulating categorical data in R
 Version: 0.1.0
-Author: Who wrote it
+Author: Martin Barner <m@martinbarner.de>
 Maintainer: Martin Barner <m@martinbarner.de>
 Description: Vector types for handling categorical data.
     Supports select-one and select-multiple types.
