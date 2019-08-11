@@ -14,12 +14,12 @@
 #' to define how these two classes should be coerced together
 vec_ptype2.cat_select_multiple <- function(x, y, ...) UseMethod("vec_ptype2.cat_select_multiple", y)
 vec_ptype2.cat_select_multiple.default <- function(x, y, ..., x_arg = "x", y_arg = "y") {
-  vec_default_ptype2(x, y, x_arg = x_arg, y_arg = y_arg)
+  vctrs::vec_default_ptype2(x, y, x_arg = x_arg, y_arg = y_arg)
 }
 
 
 vec_cast.cat_select_multiple <- function(x, to, ...) UseMethod("vec_cast.cat_select_multiple")
-vec_cast.cat_select_multiple.default <- function(x, to, ...) vec_default_cast(x, to)
+vec_cast.cat_select_multiple.default <- function(x, to, ...) vctrs::vec_default_cast(x, to)
 
 
 vec_ptype2.cat_select_multiple.cat_select_multiple <- function(x, y, ...) {
@@ -38,9 +38,3 @@ vec_ptype2.cat_select_multiple.integer <- function(x, y, ...) new_select_multipl
 vec_ptype2.cat_select_multiple.list <- function(x, y, ...) new_select_multiple()
 vec_ptype2.cat_select_multiple.cat_select_one <- function(x, y, ...) new_select_multiple()
 
-vec_ptype2(select_multiple(), select_multiple())
-vec_ptype_show(select_multiple(),integer(),double())
-
-
-
-vec_ptype2.cat_select_multiple(x)

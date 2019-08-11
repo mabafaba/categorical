@@ -62,7 +62,7 @@
 
 #' unlike the coersions, the casting functions return _the casted object_ and not just the
 vec_cast.cat_select_multiple <- function(x, to, ...) UseMethod("vec_cast.cat_select_multiple")
-vec_cast.cat_select_multiple.default <- function(x, to, ...) vec_default_cast(x, to)
+vec_cast.cat_select_multiple.default <- function(x, to, ...) vctrs::vec_default_cast(x, to)
 
 vec_cast.cat_select_multiple.cat_select_multiple <- function(x, to, ...) x
 vec_cast.cat_select_multiple.integer <- function(x, to, ...) select_multiple(x)
