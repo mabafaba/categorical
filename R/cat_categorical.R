@@ -85,7 +85,8 @@ as_categorical<-categorical
 #' @S3method format cat_categorical
 #' @export
 format.cat_categorical<-function(x, ..., cat = FALSE) {
-
+  single_selection<-all(purrr::map_int(x,length)==1)
+  if(single_selection){return(invisible(as.character(unlist(x))))}
   x<-purrr::map_chr(x,function(x){
     x<-as.character(x)
     if(cat){
@@ -107,7 +108,7 @@ format.cat_categorical<-function(x, ..., cat = FALSE) {
   })
 
 
-  x
+  invisible(x)
 }
 
 categorical_alternative<-function(x,alternative = 1, internal = FALSE){
