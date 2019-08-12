@@ -39,6 +39,8 @@ c.factor <- function(..., recursive=TRUE) unlist(list(...), recursive=recursive)
 }
 
 #' Logical operators for select multiple
+#' @param x values to check
+#' @param y values to check against
 #' @export
 `%==exactly%`<-function(x,y){
   assertthat::assert_that(is_select_multiple(x))

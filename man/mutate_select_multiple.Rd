@@ -2,7 +2,10 @@
 % Please edit documentation in R/select_multiple_s3.R
 \name{mutate_select_multiple}
 \alias{mutate_select_multiple}
-\title{Mutate select_multiple type variables in a data frame}
+\title{#' @export
+as.logical.cat_select_multiple<-function(x, ...){
+  # categorical::spread_select_multiple(x)
+}}
 \usage{
 mutate_select_multiple(.data, ...)
 }
