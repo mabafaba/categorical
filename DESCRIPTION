@@ -20,4 +20,5 @@ Imports:
     magrittr,
     vctrs,
     assertthat,
-    dplyr
+    dplyr,
+    rlang
