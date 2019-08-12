@@ -14,11 +14,12 @@
 
 
 
-#' create a select multiple variable from a character vector, list or binary matrix
-#' @param x a character vector with concatenated categorical choices (for example 'c("choice_A choices_B", "choice_C")`)
-#' @param choices list of options; equivalent to factor levels (in case some options were never selected but we want to track them regardless)
-#' @param labels named vector with choice labels. the vector name is the value in `x`, the vector value is the label.
-#' @param sep the delimeter used to separate the choices in each element of `x` ("choice_A choice_B" vs. "choice_A; choice_B"). uses regex.
+#' create a new categorical variable
+#'
+#' @param x a vector or list to be used as values for the categorical vector
+#' @param levels list of possible values for x; similar to factor levels
+#' @param alternatives_internal a named list of vectors with alternative values corresponding to 'levels'. Must have the same length as levels. Can be accessed with \code{categorical_alternative}. "internal" alternatives are used to store 'fixed' alternatives for classes extending 'cat_categorical'.
+#' @param ... named vectors with alternative values corresponding to 'levels'. Must each have the same length as levels. Can be accessed with \code{categorical_alternative}. These "external" alternatives are open to user defined alternatives, for example labels in multiple languages.
 #' @export
 categorical <- function(x, levels = unique(unlist(x)), alternatives_internal = tibble::tibble(.rows = length(levels)), ...) {
 
@@ -31,7 +32,7 @@ categorical <- function(x, levels = unique(unlist(x)), alternatives_internal = t
 
 
   # alternatives should always be(come) a tibble, and should always have as many rows as levels exist:
-  if(is.null(alternatives)){
+  if(is.null(alternatives_internal)){
     alternatives_internal<-tibble::tibble(.rows = length(levels))
   }
 
@@ -52,10 +53,10 @@ categorical <- function(x, levels = unique(unlist(x)), alternatives_internal = t
 
 #' create a new categorical variable
 #'
-#' @param x a character vector with concatenated categorical choices (for example 'c("choice_A choices_B", "choice_C")`)
-#' @param choices list of options; equivalent to factor levels (in case some options were never selected but we want to track them regardless)
-#' @param labels named vector with choice labels. the vector name is the value in `x`, the vector value is the label.
-#' @param sep the delimeter used to separate the choices in each element of `x` ("choice_A choice_B" vs. "choice_A; choice_B"). uses regex.
+#' @param x a vector or list to be used as values for the categorical vector
+#' @param levels list of possible values for x; similar to factor levels. Defaults to the unique values in x
+#' @param alternatives_internal a named list of vectors with alternative values corresponding to 'levels'. Must have the same length as levels. Can be accessed with \code{categorical_alternative}. "internal" alternatives are used to store 'fixed' alternatives for classes extending 'cat_categorical'.
+#' @param alternatives a named list of vectors with alternative values corresponding to 'levels'. Must have the same length as levels. Can be accessed with \code{categorical_alternative}. These "external" alternatives are open to user defined alternatives, for example labels in multiple languages.
 new_categorical <- function(x, levels,
                             alternatives_internal = tibble::tibble(.rows = length(levels)),
                             alternatives = tibble::tibble(.rows = length(levels))) {
@@ -68,12 +69,12 @@ new_categorical <- function(x, levels,
 }
 
 
-#' convert to categorical variable
+#' create a new categorical variable
 #'
-#' @param x a character vector with concatenated categorical choices (for example 'c("choice_A choices_B", "choice_C")`)
-#' @param choices list of options; equivalent to factor levels (in case some options were never selected but we want to track them regardless)
-#' @param labels named vector with choice labels. the vector name is the value in `x`, the vector value is the label.
-#' @param sep the delimeter used to separate the choices in each element of `x` ("choice_A choice_B" vs. "choice_A; choice_B"). uses regex.
+#' @param x a vector or list to be used as values for the categorical vector
+#' @param levels list of possible values for x; similar to factor levels
+#' @param alternatives_internal a named list of vectors with alternative values corresponding to 'levels'. Must have the same length as levels. Can be accessed with \code{categorical_alternative}. "internal" alternatives are used to store 'fixed' alternatives for classes extending 'cat_categorical'.
+#' @param ... named vectors with alternative values corresponding to 'levels'. Must each have the same length as levels. Can be accessed with \code{categorical_alternative}. These "external" alternatives are open to user defined alternatives, for example labels in multiple languages.
 #' @export
 as_categorical<-categorical
 
@@ -143,7 +144,7 @@ categorical_alternative<-function(x,alternative = 1, internal = FALSE){
 
 #' check if vector is of class cat_categorical
 #' @param x a vector
-#' @return TRUE if it is
+#' @return TRUE if it is a categorical vector
 #' @export
 is_categorical<-function(x){
   inherits(x,'cat_categorical')
@@ -153,18 +154,18 @@ is_categorical<-function(x){
 
 #' check if vector is of class cat_categorical
 #' @param x a vector
-#' @return TRUE if it is
+#' @return TRUE if it is a categorical vector
 #' @export
 is.categorical<-is_categorical
 
 #' Mutate categorical type variables in a data frame
 #' @param .data a data.frame or tibble
 #' @param ... arguments passed to dplyr::mutate
-#' @details operates rowwise (see ?dplyr::rowwise) on a categorical column. Each row's value is a factor vector with the selected responses.
+#' @details operates rowwise (see ?dplyr::rowwise) on a categorical column. Each row's value is a vector with the selected responses.
 #' @return see ?dplyr::mutate
 #' @export
 mutate_categorical<-function(.data,...){
-  mutation <- enquos(...)
+  mutation <- rlang::enquos(...)
   .data<-.data %>% dplyr::rowwise %>% dplyr::mutate(!!! mutation)
   class(.data)<-class(.data)[class(.data)!="rowwise_df"]
   .data

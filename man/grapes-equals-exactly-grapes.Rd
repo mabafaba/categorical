@@ -6,6 +6,11 @@
 \usage{
 x \%==exactly\% y
 }
+\arguments{
+\item{x}{values to check}
+
+\item{y}{values to check against}
+}
 \description{
 Logical operators for select multiple
 }

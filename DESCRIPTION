@@ -11,14 +11,17 @@ Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1
 Suggests: 
-    testthat
-Imports: 
-    pillar,
-    purrr,
-    crayon,
-    tibble,
-    magrittr,
-    vctrs,
-    assertthat,
-    dplyr,
-    rlang
+    testthat (>= 2.0.1)
+Imports:
+    pillar (>= 1.4.2),
+    purrr (>= 0.2.5),
+    crayon (>= 1.3.4),
+    tibble (>= 2.1.3),
+    magrittr (>= 1.5),
+    vctrs (>= 0.2.0),
+    assertthat (>= 0.2.0),
+    dplyr (>= 0.8.3),
+    rlang (>= 0.4.0),
+    methods
+Depends: 
+    R (>= 3.5.0)

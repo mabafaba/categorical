@@ -2,7 +2,7 @@
 % Please edit documentation in R/select_multiple_s3.R
 \name{as_select_multiple}
 \alias{as_select_multiple}
-\title{cconvert to select_multiple variable}
+\title{convert to select_multiple variable}
 \usage{
 as_select_multiple(x = character(), choices = NULL, labels = NULL,
   sep = " ")
@@ -17,5 +17,5 @@ as_select_multiple(x = character(), choices = NULL, labels = NULL,
 \item{sep}{the delimeter used to separate the choices in each element of `x` ("choice_A choice_B" vs. "choice_A; choice_B"). uses regex.}
 }
 \description{
-cconvert to select_multiple variable
+convert to select_multiple variable
 }

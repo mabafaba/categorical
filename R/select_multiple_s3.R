@@ -120,14 +120,14 @@ is_select_multiple<-function(x){
 #' @export
 is.select_multiple<-is_select_multiple
 
-
-
-
-#' @export
-as.logical.cat_select_multiple<-function(x, ...){
-  categorical::spread_select_multiple(x)
-}
-
+#'
+#'
+#'
+#' #' @export
+#' as.logical.cat_select_multiple<-function(x, ...){
+#'   # categorical::spread_select_multiple(x)
+#' }
+#'
 
 
 #' Mutate select_multiple type variables in a data frame
@@ -137,7 +137,7 @@ as.logical.cat_select_multiple<-function(x, ...){
 #' @return see ?dplyr::mutate
 #' @export
 mutate_select_multiple<-function(.data,...){
-  mutation <- enquos(...)
+  mutation <- rlang::enquos(...)
   .data<-.data %>% dplyr::rowwise %>% dplyr::mutate(!!! mutation)
   class(.data)<-class(.data)[class(.data)!="rowwise_df"]
   .data

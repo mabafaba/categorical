@@ -12,22 +12,28 @@
 #' start with the boilerplate for vec_ptype2()
 #' this is just so later we can write vec_ptype2.cat_select_multiple.OTHERCLASS
 #' to define how these two classes should be coerced together
+#' @param x vector object
+#' @param y vector object
+#' @param ... additional arguments
 vec_ptype2.cat_select_multiple <- function(x, y, ...) UseMethod("vec_ptype2.cat_select_multiple", y)
 vec_ptype2.cat_select_multiple.default <- function(x, y, ..., x_arg = "x", y_arg = "y") {
   vctrs::vec_default_ptype2(x, y, x_arg = x_arg, y_arg = y_arg)
 }
 
-
+#' cast select_multiple vectors
+#' @param x vector
+#' @param to prototype to conver to
+#' @param ... additional arguments
 vec_cast.cat_select_multiple <- function(x, to, ...) UseMethod("vec_cast.cat_select_multiple")
 vec_cast.cat_select_multiple.default <- function(x, to, ...) vctrs::vec_default_cast(x, to)
 
 
-vec_ptype2.cat_select_multiple.cat_select_multiple <- function(x, y, ...) {
+vec_ptype2.cat_select_multiple.cat_select_multiple <- function(e1, e2, ...) {
 
   choices<-unique(c(levels(e1),levels(e2)))
   labels<-c(attributes(e1)$labels,attributes(e2)$labels)
   labels<-labels[!duplicated(names(labels))]
-  values<-c(unclass(x),unclass(y))
+  values<-c(unclass(e1),unclass(e1))
   select_multiple(values,choices = choices,labels = labels)
 
 }
