@@ -58,7 +58,7 @@ format.cat_ordinal<-function(x, ..., cat = FALSE) {
         # number of selected items
         paste0(crayon::silver(crayon::italic(paste0("#",rank,"-"))),unlist(unclass(x))),
         # concatenated choices
-       collapse = crayon::silver(crayon::italic(" & "))
+        collapse = crayon::silver(crayon::italic(" & "))
       )
     }else{
       paste0(
@@ -78,7 +78,7 @@ format.cat_ordinal<-function(x, ..., cat = FALSE) {
 
 vec_proxy_compare.cat_ordinal<-function(x,...){
   (categorical_alternative(x,'ranks',T) %>%
-             unlist %>% as.numeric)}
+     unlist %>% as.numeric)}
 
 
 
