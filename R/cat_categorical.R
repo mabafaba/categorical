@@ -111,8 +111,11 @@ format.cat_categorical<-function(x, ..., cat = FALSE) {
   invisible(x)
 }
 
-categorical_alternative<-function(x,alternative = 1, internal = FALSE){
+alternate<-function(x,alternative = NULL, internal = FALSE){
 
+  if(is.null(alternative)){
+
+  }
   if(internal){
     alt_attribute<- "alternatives_internal"
   }else{
@@ -137,6 +140,37 @@ categorical_alternative<-function(x,alternative = 1, internal = FALSE){
  categorical(alternative_values,levels = unique(unlist(alternative_values)))
 }
 
+alternative<-function(x,alternative, internal = FALSE){
+
+  if(internal){
+    alt_attribute<- "alternatives_internal"
+  }else{
+    alt_attribute<- "alternatives"
+  }
+  alternatives_df<-attr(x,alt_attribute)
+
+  # check requested alternative exists:
+  if(!(ncol(alternatives_df)>0)){stop('no alternative attributes available; maybe if you change the `internal` argument?')}
+
+
+  alternative_valid <- (alternative %in% colnames(alternatives_df)) | (is.numeric(alternative) & alternative <= ncol(alternatives_df))
+  if(!alternative_valid){
+    stop(paste('can\'t select alternative', alternative, 'from available alternatives:', paste0(names(alternatives_df),collapse = " "),'. Maybe you need to change the `internal` argument?'))
+  }
+
+  levels<-attr(x,'levels')
+
+
+  alternative_indices<-purrr::map(x, match, table = levels)
+  alternative_values<- purrr::map(alternative_indices,function(x){alternatives_df[x, alternative] %>% unname %>% unlist})
+  attributes(x)$original_values <- vctrs::vec_data(my_colors)
+
+  categorical(alternative_values,levels = unique(unlist(alternative_values)),alternatives_internal = list(original = x))
+}
+
+unalternative<-function(x){
+  return(attr(x,'alternatives_internal')$original)
+}
 
 
 

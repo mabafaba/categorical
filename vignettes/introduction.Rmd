@@ -1,0 +1,39 @@
+---
+title: "Introduction"
+author: "M B"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+`categorical` gives you four new basic vectors:
+
+- `categorical` itself: a vector with levels (predefined categorical values in the vector, just like in factors), labels (sort of like names), and the option to define any number of alternatives values for each level. The main values can be characters, numbers or factors:
+
+```{r}
+library(categorical)
+
+my_colors <- categorical(x = c("red","blue" , "red","red", "blue"), 
+                         levels =  c("red", "green", "blue"),
+                         hexcode = c("#FF0000","#00FF00","#0000FF"))
+
+my_colors                
+
+```
+
+you can switch to the alternative value at any time:
+
+```{r}
+alternative(my_colors, 'hexcode')
+
+```
