@@ -21,7 +21,7 @@
 #' @param alternatives_internal a named list of vectors with alternative values corresponding to 'levels'. Must have the same length as levels. Can be accessed with \code{categorical_alternative}. "internal" alternatives are used to store 'fixed' alternatives for classes extending 'cat_categorical'.
 #' @param ... named vectors with alternative values corresponding to 'levels'. Must each have the same length as levels. Can be accessed with \code{categorical_alternative}. These "external" alternatives are open to user defined alternatives, for example labels in multiple languages.
 #' @export
-categorical <- function(x, levels = unique(unlist(x)), alternatives_internal = tibble::tibble(.rows = length(levels)), ...) {
+categorical <- function(x = character(), levels = unique(unlist(x)), alternatives_internal = tibble::tibble(.rows = length(levels)), ...) {
 
   assertthat::assert_that(all(unique(unlist(x,use.names = FALSE)) %in% levels))
 
@@ -85,7 +85,7 @@ levels.cat_categorical<-function(x){
 #' @param levels list of possible values for x; similar to factor levels. Defaults to the unique values in x
 #' @param alternatives_internal a named list of vectors with alternative values corresponding to 'levels'. Must have the same length as levels. Can be accessed with \code{categorical_alternative}. "internal" alternatives are used to store 'fixed' alternatives for classes extending 'cat_categorical'.
 #' @param alternatives a named list of vectors with alternative values corresponding to 'levels'. Must have the same length as levels. Can be accessed with \code{categorical_alternative}. These "external" alternatives are open to user defined alternatives, for example labels in multiple languages.
-new_categorical <- function(x, levels,
+new_categorical <- function(x = character(), levels,
                             alternatives_internal = tibble::tibble(.rows = length(levels)),
                             alternatives = tibble::tibble(.rows = length(levels))) {
 
@@ -115,7 +115,7 @@ as_categorical<-categorical
 format.cat_categorical<-function(x, ..., cat = FALSE) {
   x<-vctrs::field(x,'active_value')
   single_selection<-all(purrr::map_int(x,length)==1)
-  if(single_selection){return(invisible(as.character(unlist(x))))}
+  if(single_selection){return(invisible(paste0("'",as.character(unlist(x)),"'")))}
   x<-purrr::map_chr(x,function(x){
     x<-as.character(unclass(x))
     if(cat){
@@ -163,7 +163,14 @@ list_alternatives<-function(x,internal = NULL){
 alternate<-function(x,alternative = NULL, internal = FALSE){
 
   if(is.null(alternative)){
-    vctrs::field(x,'active_value')<-vctrs::field(x,'level_value')
+
+    # if(!has_multiple_response(x)){
+    #   vctrs::field(x,'active_value')<-
+    #     unlist(vctrs::field(x,'level_value'))
+    #
+    # }
+    vctrs::field(x,'active_value')<-
+        unlist(vctrs::field(x,'level_value'))
     return(x)
   }
 
@@ -273,4 +280,11 @@ as.matrix.cat_categorical<-function(x){
 }
 
 
+
+
+
+has_multiple_response<-function(x){
+  if(!is.list(x)){return(FALSE)}
+  !all(purrr::map_dbl(field(x,'active_value'),length)==1)
+}
 

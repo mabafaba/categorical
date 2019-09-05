@@ -4,7 +4,7 @@
 \alias{as_categorical}
 \title{create a new categorical variable}
 \usage{
-as_categorical(x, levels = unique(unlist(x)),
+as_categorical(x = character(), levels = unique(unlist(x)),
   alternatives_internal = tibble::tibble(.rows = length(levels)), ...)
 }
 \arguments{
