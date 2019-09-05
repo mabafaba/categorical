@@ -18,9 +18,13 @@ knitr::opts_chunk$set(
 
 `categorical` gives you four new basic vectors:
 
-- `categorical` itself: a vector with levels (predefined categorical values in the vector, just like in factors), labels (sort of like names), and the option to define any number of alternatives values for each level. The main values can be characters, numbers or factors:
+- `categorical` itself: a vector with levels (predefined categorical values in the vector, just like in factors), labels (sort of like names), and the option to define any number of alternatives values for each level. The main values can be characters, numbers or factors. Each record / item in the vector can have any number of levels selected (including none).
+- three specific classes derived from it: `ordinal` and `range`
+
+## The `categorical` class
 
 ```{r}
+library(dplyr)
 library(categorical)
 
 my_colors <- categorical(x = c("red","blue" , "red","red", "blue"), 
@@ -34,6 +38,105 @@ my_colors
 you can switch to the alternative value at any time:
 
 ```{r}
-alternative(my_colors, 'hexcode')
+my_colors_as_hexcodes<-alternate(my_colors, alternative = 'hexcode')
 
 ```
+
+if you don't provide an `alternative` argument, the vector is reverted to the original value:
+
+```{r}
+
+alternate(my_colors_as_hexcodes)
+
+```
+
+Note that multiple 'original' values can have the same alternative; one 'original' can however not point to multiple different alternatives. So the 'original' vector should always be the most granular one.
+
+### `categorical` vectors with levels and alternatives
+
+```{r}
+
+# What is your favourite colour?
+
+my_colors <- categorical(x = c("red","blue" , "red","red", "blue"), 
+                         levels =  c("red", "green", "blue"),
+                         hexcode = c("#FF0000","#00FF00","#0000FF"),
+                         temperature = c('warm', 'cool', 'cool'))
+
+
+
+color_temp <- alternate(my_colors, 'temperature')
+
+color_temp
+
+alternate(color_temp)
+```
+
+We can switch as suitable:
+
+```{r}
+colour_df<-tibble(my_colors)
+colour_df
+
+```
+
+
+### Multiple selection
+
+`categorical` vectors support _multiple selection_. That means that for each element of a vector, each level can be 'selected' or not selected: 
+
+```{r}
+
+# What are your favourite colour? (some people like more than one color, or even no colors at all!)
+
+
+
+many_favourite_colours <- categorical(list(c('red'),
+                                           c('blue', 'orange', 'yellow'),
+                                           c('yellow', 'magenta'),
+                                           c('black'),
+                                           c()))
+
+
+```
+
+Since we didn't specify the levels, they were set automatically to the unique values in the supplied vector.
+Note that the levels correspond to all given answers, not answer combinations:
+
+```{r}
+levels(many_favourite_colours)
+```
+
+### Ordinal class
+
+
+```{r}
+# colors ordered by wavelength
+my_lightwaves<-ordinal(x = c('red','infra','violet','blue','red', 'infra'),
+                levels = c('violet','blue','red', 'infra'),rank = c(1,2,3,4))
+
+
+```
+
+
+Ordinals as all categorical classes support multiple selection:
+
+```{r}
+my_lightwaves<-ordinal(x = list(c('red','infra'),
+                                'violet',
+                                c('blue','red'),
+                                'infra'),
+                levels = c('violet','blue','red', 'infra'),rank = c(1,2,3,4))
+
+
+```
+
+
+## Intervals
+
+```{r}
+
+
+
+```{r}
+
