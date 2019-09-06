@@ -14,6 +14,7 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+library(categorical)
 ```
 
 
@@ -23,7 +24,7 @@ knitr::opts_chunk$set(
 
 Categorical Vectors are a basic vector type with the following features:
 
-- they have a fixed set of allowed values called 'levels' (like factors)
+- they have a fixed set of allowed values called 'levels' (similar to levels in factors)
 - they can store alternative values for each level; you can switch back and forth between alternatives.
 - each record in the vector can have more than one level 'selected' to allow storing multipe response data.
 - when printing categorical values, they are wrapped in single quotes (between factors that are printed with no quotes and characters that are printed with double quotes) 
@@ -49,6 +50,7 @@ we can `alternate` between the original and alternative values:
 
 mydays_en <- alternate(mydays, "labels_english")
 mydays_en
+
 ```
 
 we can `alternate` back to the original levels if we don't name the alternative:
@@ -63,7 +65,7 @@ let's subset the vector to only keep the weekend days:
 ```{r}
 
 my_weekend_days_en <- mydays_en[alternate(mydays_en, 'day_type')==categorical('weekend')]
-
+my_weekend_days_en
 ```
 
 
@@ -76,7 +78,6 @@ my_weekend_days_en <- mydays_en[alternate(mydays_en, 'day_type')==categorical('w
 
 ```{r}
 library(dplyr)
-library(categorical)
 
 my_colors <- categorical(x = c("red","blue" , "red","red", "blue"), 
                          levels =  c("red", "green", "blue"),
@@ -90,7 +91,7 @@ you can switch to the alternative value at any time:
 
 ```{r}
 my_colors_as_hexcodes<-alternate(my_colors, alternative = 'hexcode')
-
+my_colors_as_hexcodes
 ```
 
 if you don't provide an `alternative` argument, the vector is reverted to the original value:
@@ -113,7 +114,6 @@ my_colors <- categorical(x = c("red","blue" , "red","red", "blue"),
                          levels =  c("red", "green", "blue"),
                          hexcode = c("#FF0000","#00FF00","#0000FF"),
                          temperature = c('warm', 'cool', 'cool'))
-
 
 
 color_temp <- alternate(my_colors, 'temperature')
@@ -146,7 +146,8 @@ many_favourite_colours <- categorical(list(c('red'),
                                            c('blue', 'orange', 'yellow'),
                                            c('yellow', 'magenta'),
                                            c('black'),
-                                           c()))
+                                           c()),
+                                      levels = c('red','blue','orange','yellow','magenta','black'))
 
 
 ```
@@ -180,7 +181,7 @@ my_lightwaves<-ordinal(x = list(c('red','infra'),
                 levels = c('violet','blue','red', 'infra'),rank = c(1,2,3,4))
 
 
-my_lightwaves
+
 
 ```
 
