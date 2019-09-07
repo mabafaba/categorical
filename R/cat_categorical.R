@@ -107,6 +107,7 @@ new_categorical <- function(x = logical(), levels,
                   alternatives_internal = alternatives_internal,
                   alternatives = alternatives,
                   active_alternative = character(),
+                  active_alternative_is_internal = FALSE,
                   multiple_selection = multiple_selection,
                   class = c(class, "cat_categorical"))
 
@@ -171,13 +172,16 @@ list_alternatives<-function(x,internal = NULL){
   return(names(attr(x,'alternatives')))
 }
 
-set_active_alternative<-function(x,alternative = c(), internal = FALSE){
+set_active_alternative<-function(x,alternative = character(), internal = FALSE){
 
   attributes(x)$active_alternative<-alternative
+  attributes(x)$active_alternative_is_internal<-internal
   x
 
 }
 
+#' find superficial NAs
+#' @param x a <categorical> vectors
 #' @details "superficial NA's" appear in categorical vectors where the levels themselves are not NA, but the active alternative has no value for the level
 superficial_nas<-function(x){
 
@@ -191,14 +195,17 @@ superficial_nas<-function(x){
 
 
 #' Set categorical vector to alternative vales
-#' @param x categorical vector (see \link{\code{categorical}})
+#' @param x categorical vector (see \link{\code{categorical()}})
 #' @param alternative the alternative value as a string
 #' @return the original vector, but its active values are replaced by the alternative
 #' @export
-alternate<-function(x,alternative = c(), internal = FALSE){
+alternate <- function(x,alternative = c(), internal = FALSE){
 
   # get available alternatives:
 
+  if(length(alternative)==0){
+    return(set_active_alternative(x))
+  }
   if(internal){
     alt_attribute<- "alternatives_internal"
   }else{
@@ -289,7 +296,10 @@ get_level_values<-function(x){
 
 
 active_alternative<-function(x){
-  attributes(x)$active_alternative
+  alt<-attributes(x)$active_alternative
+  if(length(alt)==0){return(c())}
+  names(alt)<-ifelse(attributes(x)$active_alternative_is_internal,"internal","public")
+  alt
 }
 
 
@@ -302,11 +312,14 @@ get_active_values<-function(x){
   if(length(alternative)==0){
     return(get_level_values(x))
   }
+  is_internal<-names(alternative)=="internal"
+  alternative_values<- alternatives(x,internal = is_internal)
+
   active_values<-x %>%
     mr_logical_matrix %>%
     apply(1,which) %>%
     as.list %>%
-    purrr::map(~ unname(unlist(attributes(x)$alternatives[.x,alternative])))
+    purrr::map(~ unname(unlist(alternative_values[.x,alternative])))
   return(active_values)
 }
 

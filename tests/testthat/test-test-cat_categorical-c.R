@@ -17,7 +17,7 @@ simple1_simple1<-c(simple1,simple1)
 simple2_simple2<-c(simple2,simple2)
 simple1_simple2<-c(simple1,simple2)
 simple2_simple1<-c(simple2,simple1)
-simple2_simple2.2<-c(simple2,simple2.2)
+simple2_simple2.2<-suppressWarnings({c(simple2,simple2.2)})
 context('c() - levels')
 
 
@@ -28,6 +28,7 @@ test_that("c() -  levels", {
   expect_equal(levels(empty_simple2),levels(simple2))
   expect_equal(levels(simple1_simple1),levels(simple1))
   expect_equal(levels(simple2_simple2),levels(simple2))
+  # should give warning for non-matching alternatives:
   expect_equal(levels(simple2_simple2.2),unique(c(levels(simple2),levels(simple2.2))))
 
   expect_equal(levels(simple1_simple2),(c(levels(simple1),levels(simple2))))

@@ -74,5 +74,5 @@ mutate_categorical<-function(.data,...){
 
 # following the vctrs vignette, adding this wihtout knowing why or what it does:
 
-#' #' @importFrom methods setOldClass
-#' methods::setOldClass(c("cat_ordinal", "vctrs_vctr"))
+#' @importFrom methods setOldClass
+methods::setOldClass(c("cat_ordinal", "vctrs_vctr"))

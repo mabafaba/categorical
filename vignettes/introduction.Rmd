@@ -15,6 +15,7 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 library(categorical)
+library(tibble)
 ```
 
 
@@ -41,7 +42,6 @@ mydays <- categorical(c(1,2,1,5,6,3,7),
                                 labels_german = c('Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'),
                                 day_type = c('week','week','week','week','week','weekend','weekend')
                                 )
-
 ```
 
 we can `alternate` between the original and alternative values:
@@ -49,8 +49,7 @@ we can `alternate` between the original and alternative values:
 ```{r}
 
 mydays_en <- alternate(mydays, "labels_english")
-mydays_en
-
+alternate(mydays_en)
 ```
 
 we can `alternate` back to the original levels if we don't name the alternative:
@@ -149,7 +148,7 @@ many_favourite_colours <- categorical(list(c('red'),
                                            c()),
                                       levels = c('red','blue','orange','yellow','magenta','black'))
 
-
+many_favourite_colours
 ```
 
 Since we didn't specify the levels, they were set automatically to the unique values in the supplied vector.
@@ -167,6 +166,7 @@ levels(many_favourite_colours)
 my_lightwaves<-ordinal(x = c('red','infra','violet','blue','red', 'infra'),
                 levels = c('violet','blue','red', 'infra'),rank = c(1,2,3,4))
 
+my_lightwaves
 
 ```
 
@@ -182,7 +182,7 @@ my_lightwaves<-ordinal(x = list(c('red','infra'),
 
 
 
-
+my_lightwaves
 ```
 
 
@@ -190,7 +190,9 @@ my_lightwaves<-ordinal(x = list(c('red','infra'),
 
 ```{r}
 
-
+```
 
 ```{r}
+
+```
 

@@ -139,8 +139,12 @@ repair_joint_alternatives<-function(x,y,joined_alternatives){
   alternatives_no_duplicate_levels <-
     joined_alternatives %>%
     dplyr::group_by(`____LEVELS_CAT_CATEG_IN_vec_ptype2.cat_categorical.cat_categorical_JOIN_324895683247659__`) %>%
-    dplyr::summarise_all(first)
+    dplyr::summarise_all(dplyr::first)
 
+  # the group_by %>% summarise_all messed up the order, so:
+  alternatives_no_duplicate_levels <- alternatives_no_duplicate_levels[match(join_levels(x,y),
+                                         alternatives_no_duplicate_levels[["____LEVELS_CAT_CATEG_IN_vec_ptype2.cat_categorical.cat_categorical_JOIN_324895683247659__"]]
+                                         ),]
   if(nrow(alternatives_no_duplicate_levels)!=nrow(joined_alternatives)){
     warning("discarded duplicate alternative definitions for same levels")
   }
@@ -179,7 +183,7 @@ alternative_conflicts<-function(alt_x,alt_y,levels_x,levels_y){
   }) %>% do.call(rbind,.)
 
   if(any(alternative_missmatches$missmatch)){
-    alternative_missmatches<-alternative_missmatches %>% filter(missmatch)
+    alternative_missmatches<-alternative_missmatches %>% dplyr::filter(missmatch)
     unmatchable_alternative_variables<-alternative_missmatches$var
     # message_text<- paste0('Joining categorical vectors: Alternatives with the same name have different values assigned to the same levels and will be renamed; affected:\n',
     #                        paste0(unmatchable_alternative_variables,": ", alternative_missmatches$levels_text[alternative_missmatches$missmatch],collapse = "\n"))
