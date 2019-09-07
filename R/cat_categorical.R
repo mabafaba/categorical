@@ -21,7 +21,7 @@
 #' @param alternatives_internal a named list of vectors with alternative values corresponding to 'levels'. Must have the same length as levels. Can be accessed with \code{categorical_alternative}. "internal" alternatives are used to store 'fixed' alternatives for classes extending 'cat_categorical'.
 #' @param ... named vectors with alternative values corresponding to 'levels'. Must each have the same length as levels. Can be accessed with \code{categorical_alternative}. These "external" alternatives are open to user defined alternatives, for example labels in multiple languages.
 #' @export
-categorical <- function(x = character(), levels = unique(unlist(x)), alternatives_internal = tibble::tibble(.rows = length(levels)), ...) {
+categorical <- function(x = logical(), levels = unique(unlist(x)), alternatives_internal = tibble::tibble(.rows = length(levels)), ..., class = c()) {
 
   assertthat::assert_that(all(unique(unlist(x,use.names = FALSE)) %in% levels))
 
@@ -67,7 +67,8 @@ categorical <- function(x = character(), levels = unique(unlist(x)), alternative
   new_categorical(x = x,
                   levels = levels,
                   alternatives_internal = alternatives_internal,
-                  alternatives = public_alternatives)
+                  alternatives = public_alternatives,
+                  class = class)
 }
 
 
@@ -85,14 +86,30 @@ levels.cat_categorical<-function(x){
 #' @param levels list of possible values for x; similar to factor levels. Defaults to the unique values in x
 #' @param alternatives_internal a named list of vectors with alternative values corresponding to 'levels'. Must have the same length as levels. Can be accessed with \code{categorical_alternative}. "internal" alternatives are used to store 'fixed' alternatives for classes extending 'cat_categorical'.
 #' @param alternatives a named list of vectors with alternative values corresponding to 'levels'. Must have the same length as levels. Can be accessed with \code{categorical_alternative}. These "external" alternatives are open to user defined alternatives, for example labels in multiple languages.
-new_categorical <- function(x = character(), levels,
+new_categorical <- function(x = logical(), levels,
                             alternatives_internal = tibble::tibble(.rows = length(levels)),
-                            alternatives = tibble::tibble(.rows = length(levels))) {
+                            alternatives = tibble::tibble(.rows = length(levels)),multiple_selection = FALSE,
+                            class = c()) {
 
-  vctrs::new_rcrd(fields = list(active_value = x, level_value = x), class = "cat_categorical",
+  if(length(x)==0){
+    logical_fields<-purrr::map(levels,function(x){logical(0)})
+  }else{
+    logical_fields<-purrr::map(x,function(x){
+      levels %in% x
+    }) %>% do.call(rbind,.) %>% as.data.frame %>% as.list
+  }
+  names(logical_fields)<-levels
+  if(length(logical_fields)==0 & length(levels)==0){
+    logical_fields<-list('0'=logical())
+  }
+  vctrs::new_rcrd(fields = logical_fields,
                   levels = levels,
                   alternatives_internal = alternatives_internal,
-                  alternatives = alternatives)
+                  alternatives = alternatives,
+                  active_alternative = character(),
+                  active_alternative_is_internal = FALSE,
+                  multiple_selection = multiple_selection,
+                  class = c(class, "cat_categorical"))
 
 }
 
@@ -113,7 +130,7 @@ as_categorical<-categorical
 #' @S3method format cat_categorical
 #' @export
 format.cat_categorical<-function(x, ..., cat = FALSE) {
-  x<-vctrs::field(x,'active_value')
+  x<-get_active_values(x)
   single_selection<-all(purrr::map_int(x,length)==1)
   if(single_selection){return(invisible(paste0("'",as.character(unlist(x)),"'")))}
   x<-purrr::map_chr(x,function(x){
@@ -147,7 +164,7 @@ format.cat_categorical<-function(x, ..., cat = FALSE) {
 #' @export
 list_alternatives<-function(x,internal = NULL){
   if(is.null(internal)){
-  return(list(internal = names(attr(x,'alternatives_internal')), public = names(attr(x,'alternatives'))))
+    return(list(internal = names(attr(x,'alternatives_internal')), public = names(attr(x,'alternatives'))))
   }
   if(internal){
     return(names(attr(x,'alternatives_internal')))
@@ -155,25 +172,40 @@ list_alternatives<-function(x,internal = NULL){
   return(names(attr(x,'alternatives')))
 }
 
+set_active_alternative<-function(x,alternative = character(), internal = FALSE){
+
+  attributes(x)$active_alternative<-alternative
+  attributes(x)$active_alternative_is_internal<-internal
+  x
+
+}
+
+#' find superficial NAs
+#' @param x a <categorical> vectors
+#' @details "superficial NA's" appear in categorical vectors where the levels themselves are not NA, but the active alternative has no value for the level
+superficial_nas<-function(x){
+
+  active_values <-get_active_values(x)
+  level_values  <-get_level_values(x)
+
+  superficial_nas<- is.na(active_values) & !is.na(level_values)
+  names(superficial_nas)<-level_values
+  return(superficial_nas)
+}
+
+
 #' Set categorical vector to alternative vales
-#' @param x categorical vector (see \link{\code{categorical}})
+#' @param x categorical vector (see \link{\code{categorical()}})
 #' @param alternative the alternative value as a string
 #' @return the original vector, but its active values are replaced by the alternative
 #' @export
-alternate<-function(x,alternative = NULL, internal = FALSE){
+alternate <- function(x,alternative = c(), internal = FALSE){
 
-  if(is.null(alternative)){
+  # get available alternatives:
 
-    # if(!has_multiple_response(x)){
-    #   vctrs::field(x,'active_value')<-
-    #     unlist(vctrs::field(x,'level_value'))
-    #
-    # }
-    vctrs::field(x,'active_value')<-
-        unlist(vctrs::field(x,'level_value'))
-    return(x)
+  if(length(alternative)==0){
+    return(set_active_alternative(x))
   }
-
   if(internal){
     alt_attribute<- "alternatives_internal"
   }else{
@@ -183,21 +215,31 @@ alternate<-function(x,alternative = NULL, internal = FALSE){
 
   # check requested alternative exists:
   if(!(ncol(alternatives_df)>0)){stop('no alternative attributes available; maybe if you change the `internal` argument?')}
-
-
-  alternative_valid <- (alternative %in% colnames(alternatives_df)) | (is.numeric(alternative) & alternative <= ncol(alternatives_df))
+  if(length(alternative)==0){alternative_valid<-TRUE
+  }else{
+    alternative_valid <- (alternative %in% colnames(alternatives_df)) | (is.numeric(alternative) & alternative <= ncol(alternatives_df))
+  }
   if(!alternative_valid){
-      stop(paste('can\'t select alternative', alternative, 'from available alternatives:', paste0(names(alternatives_df),collapse = " "),'. Maybe you need to change the `internal` argument?'))
+    stop(paste('can\'t select alternative', alternative, 'from available alternatives:', paste0(names(alternatives_df),collapse = " "),'. Maybe you need to change the `internal` argument?'))
   }
 
-  levels<-attr(x,'levels')
+  x<-set_active_alternative(x,
+                            alternative = alternative,
+                            internal = internal)
+
+  superficial_nas<-superficial_nas(x)
+  if(any(superficial_nas)){
+    NA_level_names<-unique(names(superficial_nas[superficial_nas==TRUE]))
+    warning(paste0(
+      "superficial NAs produced (see ?superficial_nas). selected alternative has no values defined for these levels:",
+      "'",paste0(NA_level_names,collapse = '\', \''),"'"
+      )
+      )
 
 
- alternative_indices<-purrr::map(vctrs::field(x,'level_value'), match, table = levels)
- alternative_values<- purrr::map(alternative_indices,function(x){alternatives_df[x, alternative] %>% unname %>% unlist})
- vctrs::field(x,'active_value')<-alternative_values
- x
+  }
 
+  x
 }
 
 
@@ -240,14 +282,47 @@ mutate_categorical<-function(.data,...){
 methods::setOldClass(c("cat_categorical", "vctrs_vctr"))
 
 
-
-level_values<-function(x){
-  vctrs::field(x,'level_value')
+mr_logical_matrix<-function(x){
+  lgl_matrix <- purrr::map(fields(x),field,x=x)   %>% do.call(cbind,.)
 }
 
-active_values<-function(x){
-  vctrs::field(x,'level_value')
+
+get_level_values<-function(x){
+  x %>% mr_logical_matrix %>%
+    apply(1,which) %>%
+    as.list %>%
+    purrr::map(~ levels(x)[.x])
 }
+
+
+active_alternative<-function(x){
+  alt<-attributes(x)$active_alternative
+  if(length(alt)==0){return(c())}
+  names(alt)<-ifelse(attributes(x)$active_alternative_is_internal,"internal","public")
+  alt
+}
+
+
+get_active_values<-function(x){
+
+  if(!is_categorical(x)){stop('not a categorical vector')}
+
+
+  alternative<-active_alternative(x)
+  if(length(alternative)==0){
+    return(get_level_values(x))
+  }
+  is_internal<-names(alternative)=="internal"
+  alternative_values<- alternatives(x,internal = is_internal)
+
+  active_values<-x %>%
+    mr_logical_matrix %>%
+    apply(1,which) %>%
+    as.list %>%
+    purrr::map(~ unname(unlist(alternative_values[.x,alternative])))
+  return(active_values)
+}
+
 
 #' mutate categorical type variables, while treating each choice as logical
 #'
@@ -274,7 +349,7 @@ as.matrix.cat_categorical<-function(x){
 
     1:length(unique_levels) %in% match(values, unique_levels)
 
-    }) %>% do.call(rbind,.)
+  }) %>% do.call(rbind,.)
   colnames(logical_matrix)<-levels(x)
   logical_matrix
 }
@@ -284,7 +359,8 @@ as.matrix.cat_categorical<-function(x){
 
 
 has_multiple_response<-function(x){
-  if(!is.list(x)){return(FALSE)}
-  !all(purrr::map_dbl(field(x,'active_value'),length)==1)
+  if(!is_categorical(x)){stop('not a categorical vector')}
+  !all(apply(mr_logical_matrix(x),1,function(x){length(which(x))})==1)
 }
+
 

@@ -6,9 +6,7 @@
 #' @param ranks a vector of numeric ranks corresponding to each level.
 #' @param ... named vectors with alternative values corresponding to 'levels'. Must each have the same length as levels. Can be accessed with \code{alternate}. These "external" alternatives are open to user defined alternatives, for example labels in multiple languages.
 new_ordinal<-function(x, levels, ranks, ...){
-  x<-categorical(x = x,levels = levels, alternatives_internal = list(ranks=ranks))
-  class(x)<-c('cat_ordinal', class(x))
-  class(x)<-class(x)[class(x)!='cat_categorical']
+  x<-categorical(x = x,levels = levels, alternatives_internal = list(ranks=ranks), class = 'cat_ordinal')
   x
 }
 
@@ -76,5 +74,5 @@ mutate_categorical<-function(.data,...){
 
 # following the vctrs vignette, adding this wihtout knowing why or what it does:
 
-#' #' @importFrom methods setOldClass
-#' methods::setOldClass(c("cat_ordinal", "vctrs_vctr"))
+#' @importFrom methods setOldClass
+methods::setOldClass(c("cat_ordinal", "vctrs_vctr"))

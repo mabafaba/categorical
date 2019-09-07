@@ -4,8 +4,9 @@
 \alias{as_categorical}
 \title{create a new categorical variable}
 \usage{
-as_categorical(x = character(), levels = unique(unlist(x)),
-  alternatives_internal = tibble::tibble(.rows = length(levels)), ...)
+as_categorical(x = logical(), levels = unique(unlist(x)),
+  alternatives_internal = tibble::tibble(.rows = length(levels)), ...,
+  class = c())
 }
 \arguments{
 \item{x}{a vector or list to be used as values for the categorical vector}

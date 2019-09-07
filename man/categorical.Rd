@@ -12,8 +12,9 @@ cat_categorical is:
        - integer rank (ordinal)
    - it has an attribute for _open alternative values_, allowing the user to add different alternative values, such as labels in different languages}
 \usage{
-categorical(x = character(), levels = unique(unlist(x)),
-  alternatives_internal = tibble::tibble(.rows = length(levels)), ...)
+categorical(x = logical(), levels = unique(unlist(x)),
+  alternatives_internal = tibble::tibble(.rows = length(levels)), ...,
+  class = c())
 }
 \arguments{
 \item{x}{a vector or list to be used as values for the categorical vector}

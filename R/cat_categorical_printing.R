@@ -2,7 +2,7 @@
 #' @method print cat_categorical
 #' @S3method print cat_categorical
 print.cat_categorical<-function(x, ...) {
-  if(length(x)==0){
+
     levels_text<-levels(x)
     if(length(levels_text)==0){
       levels_text<-"(no levels)"
@@ -10,10 +10,12 @@ print.cat_categorical<-function(x, ...) {
       levels_text<-paste('levels:',paste0(levels_text,collapse = ' '))
 
     }
-    cat(crayon::silver(paste0('ordinal vector of length 0\n',levels_text)))
+    if(length(x)==0){cat(crayon::silver(paste0('categorical vector of length 0\n',levels_text)))
     return(invisible(x))
-  }
+    }
+
   cat(format.cat_categorical(x), sep = " ")
+  cat(paste0('\n',crayon::silver(levels_text)))
   invisible(x)
 }
 
@@ -22,7 +24,7 @@ print.cat_categorical<-function(x, ...) {
 #' @S3method obj_print_header cat_categorical
 #' @importFrom vctrs obj_print_header
 obj_print_header.cat_categorical<-function(x, ...) {
-  cat(crayon::silver(paste0("<ordinal vector>\n")))
+  cat(crayon::silver(paste0("<categorical vector>\n")))
   invisible(x)
 }
 

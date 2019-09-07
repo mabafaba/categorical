@@ -9,10 +9,10 @@
 format.cat_ordinal<-function(x, ..., cat = FALSE) {
   single_selection<-all(purrr::map_int(x,length)==1)
 
-  ranks<-alternate(x, 'ranks', internal = TRUE)
-  ranks<-vctrs::field(ranks,"active_value")
+  ranks<-alternate(x, 'ranks', internal = TRUE) %>% get_active_values
 
-  x<-purrr::map(vctrs::field(x,'level_value'),as.character)
+
+  x<-purrr::map(get_level_values(x),as.character)
 
   silvit<-function(x){
     if(cat){return(crayon::silver(crayon::italic(x)))}
@@ -49,21 +49,21 @@ invisible(unlist(x_text))
 
 #' @method print cat_ordinal
 #' @S3method print cat_ordinal
-# print.cat_ordinal<-function(x, ...) {
-#   if(length(x)==0){
-#     levels_text<-levels(x)
-#     if(length(levels_text)==0){
-#       levels_text<-"(no levels)"
-#     }else{
-#       levels_text<-paste('levels:',paste0(levels_text,collapse = ' '))
-#
-#     }
-#     cat(crayon::silver(paste0('ordinal vector of length 0\n',levels_text)))
-#     return(invisible(x))
-#   }
-#   cat(format.cat_ordinal(x), sep = " ")
-#   invisible(x)
-# }
+print.cat_ordinal<-function(x, ...) {
+  if(length(x)==0){
+    levels_text<-levels(x)
+    if(length(levels_text)==0){
+      levels_text<-"(no levels)"
+    }else{
+      levels_text<-paste('levels:',paste0(levels_text,collapse = ' '))
+
+    }
+    cat(crayon::silver(paste0('ordinal vector of length 0\n',levels_text)))
+    return(invisible(x))
+  }
+  cat(format.cat_ordinal(x), sep = " ")
+  invisible(x)
+}
 
 
 #' @method obj_print_header cat_ordinal
