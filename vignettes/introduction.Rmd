@@ -49,9 +49,9 @@ we can `alternate` between the original and alternative values:
 ```{r}
 
 mydays_en <- alternate(mydays, "labels_english")
-alternate(mydays_en)
-```
 
+```
+You can see that the levels remain untouched.
 we can `alternate` back to the original levels if we don't name the alternative:
 
 ```{r}

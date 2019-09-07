@@ -16,15 +16,16 @@ Suggests:
     rmarkdown
 Imports:
     pillar (>= 1.4.2),
-    purrr,
+    purrr (>= 0.2.5),
     crayon (>= 1.3.4),
     tibble (>= 2.1.3),
-    magrittr,
+    magrittr (>= 1.5.0),
     assertthat (>= 0.2.0),
     dplyr (>= 0.8.3),
     rlang (>= 0.4.0),
-    methods
+    methods (>= 3.5.1),
+    glue (>= 1.3.0)
 Depends: 
     R (>= 3.5.0),
-    vctrs
+    vctrs (>= 0.2.0)
 VignetteBuilder: knitr

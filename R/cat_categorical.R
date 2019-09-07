@@ -20,6 +20,9 @@
 #' @param levels list of possible values for x; similar to factor levels
 #' @param alternatives_internal a named list of vectors with alternative values corresponding to 'levels'. Must have the same length as levels. Can be accessed with \code{categorical_alternative}. "internal" alternatives are used to store 'fixed' alternatives for classes extending 'cat_categorical'.
 #' @param ... named vectors with alternative values corresponding to 'levels'. Must each have the same length as levels. Can be accessed with \code{categorical_alternative}. These "external" alternatives are open to user defined alternatives, for example labels in multiple languages.
+#' @importFrom vctrs vec_cast
+#' @importFrom vctrs vec_ptype
+#' @importFrom vctrs vec_ptype2
 #' @export
 categorical <- function(x = logical(), levels = unique(unlist(x)), alternatives_internal = tibble::tibble(.rows = length(levels)), ..., class = c()) {
 
@@ -45,9 +48,15 @@ categorical <- function(x = logical(), levels = unique(unlist(x)), alternatives_
 
 
 
-  # values should always be a list in the end
-  if(!is.list(x)){
+  # values should always be a list in the end (unless it's a logical matrix)
+  if(!is.list(x) & !is.logical(x)){
     x<-as.list(x)
+  }
+
+  if(is.logical(x)){
+    if(is.matrix(x)){
+      if(!ncol(x)==length(levels)){stop("to make a categorical vector from a logical matrix, you must provide levels, and the matrix must have one column per level")}
+    }
   }
 
 
@@ -91,13 +100,18 @@ new_categorical <- function(x = logical(), levels,
                             alternatives = tibble::tibble(.rows = length(levels)),multiple_selection = FALSE,
                             class = c()) {
 
+
   if(length(x)==0){
     logical_fields<-purrr::map(levels,function(x){logical(0)})
+  }else if(is.matrix(x) & is.logical(x)){
+    logical_fields<- x %>% as.data.frame %>% as.list
+    names(logical_fields)<-levels
   }else{
     logical_fields<-purrr::map(x,function(x){
       levels %in% x
     }) %>% do.call(rbind,.) %>% as.data.frame %>% as.list
   }
+
   names(logical_fields)<-levels
   if(length(logical_fields)==0 & length(levels)==0){
     logical_fields<-list('0'=logical())
@@ -287,41 +301,11 @@ mr_logical_matrix<-function(x){
 }
 
 
-get_level_values<-function(x){
-  x %>% mr_logical_matrix %>%
-    apply(1,which) %>%
-    as.list %>%
-    purrr::map(~ levels(x)[.x])
-}
 
 
-active_alternative<-function(x){
-  alt<-attributes(x)$active_alternative
-  if(length(alt)==0){return(c())}
-  names(alt)<-ifelse(attributes(x)$active_alternative_is_internal,"internal","public")
-  alt
-}
 
 
-get_active_values<-function(x){
 
-  if(!is_categorical(x)){stop('not a categorical vector')}
-
-
-  alternative<-active_alternative(x)
-  if(length(alternative)==0){
-    return(get_level_values(x))
-  }
-  is_internal<-names(alternative)=="internal"
-  alternative_values<- alternatives(x,internal = is_internal)
-
-  active_values<-x %>%
-    mr_logical_matrix %>%
-    apply(1,which) %>%
-    as.list %>%
-    purrr::map(~ unname(unlist(alternative_values[.x,alternative])))
-  return(active_values)
-}
 
 
 #' mutate categorical type variables, while treating each choice as logical
