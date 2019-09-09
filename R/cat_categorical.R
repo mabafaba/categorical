@@ -98,7 +98,9 @@ levels.cat_categorical<-function(x){
 new_categorical <- function(x = logical(), levels,
                             alternatives_internal = tibble::tibble(.rows = length(levels)),
                             alternatives = tibble::tibble(.rows = length(levels)),multiple_selection = FALSE,
-                            class = c()) {
+                            class = c(),
+                            active_alternative = character(),
+                            active_alternative_is_internal = FALSE) {
 
 
   if(length(x)==0){
@@ -120,8 +122,8 @@ new_categorical <- function(x = logical(), levels,
                   levels = levels,
                   alternatives_internal = alternatives_internal,
                   alternatives = alternatives,
-                  active_alternative = character(),
-                  active_alternative_is_internal = FALSE,
+                  active_alternative = active_alternative,
+                  active_alternative_is_internal = active_alternative_is_internal,
                   multiple_selection = multiple_selection,
                   class = c(class, "cat_categorical"))
 

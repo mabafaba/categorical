@@ -4,7 +4,7 @@ vec_ptype2.cat_categorical.cat_categorical<-function(x,y,...){
 
 
 
-  out_multiple_selection<-has_multiple_response(x) | has_multiple_response(y)
+  out_multiple_selection <- has_multiple_response(x) | has_multiple_response(y)
 
   x<-vec_ptype(x)
   y<-vec_ptype(y)
@@ -12,10 +12,15 @@ vec_ptype2.cat_categorical.cat_categorical<-function(x,y,...){
   out_values<-list()
   out_alternatives<-join_alternatives(x,y,FALSE)
   out_alternatives_internal<-join_alternatives(x,y,TRUE)
+  out_active_alternative<-get_active_alternative_name(x)
+  out_active_alternative_is_internal<-get_active_alternative_is_internal(x)
+
   new_categorical(levels = out_levels,
                   alternatives_internal = out_alternatives_internal,
                   alternatives = out_alternatives,
-                  multiple_selection = out_multiple_selection)
+                  multiple_selection = out_multiple_selection,
+                  active_alternative = out_active_alternative,
+                  active_alternative_is_internal = out_active_alternative_is_internal)
 }
 
 
@@ -27,12 +32,21 @@ vec_cast.cat_categorical.cat_categorical <- function(x,to,...) {
   out_values<-join_values(x,vec_ptype(y), levels = out_levels)
   out_alternatives<-join_alternatives(x,y,FALSE)
   out_alternatives_internal<-join_alternatives(x,y,TRUE)
+
   out_multiple_selection<-has_multiple_response(x) | has_multiple_response(y)
+
+  # when differences in active alternative:
+  # - prioritise target vector
+  out_active_alternative<-get_active_alternative_name(to)
+  out_active_alternative_is_internal<-get_active_alternative_is_internal(to)
+
   new_categorical(x = out_values,
                   levels = out_levels,
                   alternatives_internal = out_alternatives_internal,
                   alternatives = out_alternatives,
-                  multiple_selection = out_multiple_selection)
+                  multiple_selection = out_multiple_selection,
+                  active_alternative = out_active_alternative,
+                  active_alternative_is_internal = out_active_alternative_is_internal )
 
 }
 

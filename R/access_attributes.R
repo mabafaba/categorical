@@ -4,7 +4,7 @@
 
 get_active_alternative_name<-function(x){
   alt<-attributes(x)$active_alternative
-  if(length(alt)==0){return(c())}
+  if(length(alt)==0){return(character())}
   names(alt)<-ifelse(attributes(x)$active_alternative_is_internal,"internal","public")
   if(is.null(alt)){return(character())}
   alt

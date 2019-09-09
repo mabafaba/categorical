@@ -4,7 +4,7 @@
 \alias{alternate}
 \title{Set categorical vector to alternative vales}
 \usage{
-alternate(x, alternative = c(), internal = FALSE)
+alternate(x, alternative = character(), internal = FALSE)
 }
 \arguments{
 \item{x}{categorical vector (see \link{\code{categorical()}})}
