@@ -12,8 +12,8 @@ vec_ptype2.cat_categorical.cat_categorical<-function(x,y,...){
   out_values<-list()
   out_alternatives<-join_alternatives(x,y,FALSE)
   out_alternatives_internal<-join_alternatives(x,y,TRUE)
-  out_active_alternative<-get_active_alternative_name(x)
-  out_active_alternative_is_internal<-get_active_alternative_is_internal(x)
+  out_active_alternative<-join_active_alternative(y,x)
+  out_active_alternative_is_internal<-attributes(out_active_alternative)$is_internal
 
   new_categorical(levels = out_levels,
                   alternatives_internal = out_alternatives_internal,
@@ -62,6 +62,29 @@ join_values<-function(x,y,levels){
   c(get_level_values(x),get_level_values(y))
 }
 
+
+join_active_alternative<-function(x,y){
+  alt_x<-get_active_alternative_name(x)
+  alt_y<-get_active_alternative_name(y)
+  if(length(alt_x)==0){
+    cat_to_use<-y
+  }else if(length(alt_y)==0){
+    cat_to_use<-x
+    }else{
+      cat_to_use<-x
+      }
+
+
+  active<-get_active_alternative_name(cat_to_use)
+  attributes(active)$is_internal<-get_active_alternative_is_internal(cat_to_use)
+  if(length(attributes(active)$is_internal)==0){
+    attributes(active)$is_internal<-FALSE
+  }
+  return(active)
+}
+
+
+
 join_alternatives<-function(x,y,internal = FALSE){
   levels<-join_levels(x,y)
   if(!internal){
@@ -95,6 +118,9 @@ join_alternatives<-function(x,y,internal = FALSE){
   joined_alternatives<-suppressMessages(dplyr::full_join(alternatives_x,alternatives_y,by = common_alternative_names,
                                                          keep=TRUE
   ))
+
+
+
 
 
   # warn about any colnames that might have changed:
