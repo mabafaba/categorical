@@ -32,10 +32,3 @@ test_that('categorical()',{
 
 })
 
-
-
-
-
-
-
-
