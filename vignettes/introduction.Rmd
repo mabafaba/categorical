@@ -34,6 +34,6 @@ my_colors
 you can switch to the alternative value at any time:
 
 ```{r}
-alternative(my_colors, 'hexcode')
+attributes(alternate1(my_colors, 'hexcode'))
 
 ```

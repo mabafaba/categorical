@@ -111,7 +111,8 @@ format.cat_categorical<-function(x, ..., cat = FALSE) {
   invisible(x)
 }
 
-alternate<-function(x,alternative = NULL, internal = FALSE){
+#' @export
+alternate1<-function(x,alternative = NULL, internal = FALSE){
 
   if(is.null(alternative)){
 
@@ -140,7 +141,9 @@ alternate<-function(x,alternative = NULL, internal = FALSE){
  categorical(alternative_values,levels = unique(unlist(alternative_values)))
 }
 
-alternative<-function(x,alternative, internal = FALSE){
+
+#' @export
+alternate2<-function(x,alternative, internal = FALSE){
 
   if(internal){
     alt_attribute<- "alternatives_internal"

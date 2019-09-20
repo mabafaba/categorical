@@ -2,12 +2,40 @@ context("test-trailanderror")
 
 library(categorical)
 library(dplyr)
+library(testthat)
 
-test<-c('A B', 'A B C')
-x<-select_multiple(test)
-undebug(print.data.frame)
+test_that('categorical()',{
 
-format.cat_select_multiple
 
-data.frame(a=x)
+  # length in == length out
+
+  expect_equal(length(categorical(c())),0)
+  expect_equal(length(categorical(c(1))),1)
+  expect_equal(length(categorical(list(list(1,2,3)))),1)
+  expect_equal(length(categorical(NULL)),0)
+  expect_equal(length(categorical(categorical(c(1,2,3)))),3)
+  is.categorical(categorical(NULL))
+
+  # na in input = NA in output
+  expect_equal(is.na(categorical(c(NA,'A',NA))),c(T,F,T))
+
+  # '==' works (or not if not wished)
+
+  expect_error(categorical(c(1,2,3))==c(1,2,3))
+  expect_true(all(categorical(c(1,2,3))==categorical(c(1,2,3))))
+  expect_true(all(categorical(c(1,0,1))==categorical(c(1,0,1))))
+  expect_false(all(categorical(c(1,0,1))==categorical(c(2,2,2))))
+
+
+
+  expect_true(all(categorical(factor(1,0,1))==categorical(c("1","0","1"))))
+
+})
+
+
+
+
+
+
+
 
