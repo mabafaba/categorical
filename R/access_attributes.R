@@ -47,13 +47,19 @@ get_active_alternative_level_values<-function(x){
 
 
 
+
 get_level_values<-function(x){
-  x %>%
+  values_as_logical_df <- x %>%
     mr_logical_matrix %>%
     t %>%
-    as.data.frame %>%
+    as.data.frame
+
+  list_of_selected_values <- values_as_logical_df %>%
     purrr::map(which) %>%
     purrr::map(~ levels(x)[.x]) %>% unname
+
+  restore_lgl_list_NA_in_value_list(list_of_selected_values,x)
+
 }
 
 
@@ -76,5 +82,35 @@ get_active_values<-function(x){
     as.data.frame %>%
     purrr::map(which) %>%
     purrr::map(~ unname(unlist(alternative_values[.x,alternative])))
+
+  restore_lgl_list_NA_in_value_list(active_values,x)
+
+
+
   return(active_values)
+}
+
+
+
+#' set a list of items to NA where any value in a categorical logical matrix representation is NA
+#' @param value_list a list with as many items as there are records in x_categorical
+#' @param x_categorical a categorical vector
+restore_lgl_list_NA_in_value_list<-function(value_list, x_categorical){
+
+  values_as_logical_df <- x_categorical %>%
+    mr_logical_matrix %>%
+    t %>%
+    as.data.frame
+
+any_NA_in_lgl_matrix<- purrr::map_lgl(values_as_logical_df,function(x){any(is.na(x))})
+purrr::map2(value_list,any_NA_in_lgl_matrix,function(values,should_be_na){
+  if(should_be_na){
+    return(NA)
+  }
+  else{
+    return(values)
+  }
+
+})
+
 }
