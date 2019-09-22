@@ -10,8 +10,29 @@ testthat::test_that("coersion - character --> categorical",{
   mydays_en<-alternate(mydays,'labels_english')
 
 
-  x<-c('Monday','Tuesday')
-  coerced <- vec_cast.cat_categorical.character(x,mydays_en)
+  monday_tuesday_char<-c('Monday','Tuesday')
+  coerced <- vec_cast.cat_categorical.character(monday_tuesday_char,mydays_en)
 
   expect_equal(as.character(levels(coerced)),as.character(1:7))
+
+
+  expect_true(all(
+    c(mydays_en[c(1,2)],monday_tuesday_char)==c(mydays_en[c(1,2)],monday_tuesday_char))
+    )
+
+  expect_true(all(
+    c(mydays_en[c(1,2)],monday_tuesday_char)==c(mydays_en[c(1,2)],monday_tuesday_char))
+  )
+
+  rhs<-c(monday_tuesday_char,monday_tuesday_char)
+  lhs<-mydays_en[c(1,2,1,2)]
+  expect_true(all(
+    lhs == rhs
+  ))
+  expect_true(all(
+    rhs == lhs
+  )
+)
+
+
 })

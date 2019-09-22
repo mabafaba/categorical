@@ -2,7 +2,7 @@
 title: "Introduction"
 author: "M B"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output: md_document
 vignette: >
   %\VignetteIndexEntry{Introduction}
   %\VignetteEngine{knitr::rmarkdown}
@@ -49,7 +49,7 @@ we can `alternate` between the original and alternative values:
 ```{r}
 
 mydays_en <- alternate(mydays, "labels_english")
-mydays_en
+
 ```
 You can see that the levels remain untouched.
 we can `alternate` back to the original levels if we don't name the alternative:
@@ -59,18 +59,12 @@ alternate(mydays_en)
 
 ```
 
-let's subset the vector to only keep the week days, and show their german labels:
+let's subset the vector to only keep the weekend days:
 
 ```{r}
 
-my_week_days <- alternate(mydays_en,'day_type')
-my_week_days
-
-my_week_days <- my_week_days[my_week_days!='weekend']
-my_week_days
-
-my_week_days <- alternate(my_week_days, 'labels_german')
-my_week_days
+my_weekend_days_en <- mydays_en[alternate(mydays_en, 'day_type')==categorical('weekend')]
+my_weekend_days_en
 ```
 
 
@@ -95,7 +89,6 @@ my_colors
 you can switch to the alternative value at any time:
 
 ```{r}
-
 my_colors_as_hexcodes<-alternate(my_colors, alternative = 'hexcode')
 my_colors_as_hexcodes
 ```

@@ -7,8 +7,9 @@ vec_ptype2.cat_categorical.character<-function(x,y,...){
   vec_ptype2.cat_categorical.cat_categorical(x,y)
 }
 
+# TODO @METHOD NOT OK! (CHAR & CAT_CATEGORICAL)
 
-#' @method vec_ptype2.cat_categorical character
+#' @method vec_ptype2.character cat_categorical character
 #' @export
 vec_ptype2.character.cat_categorical<-function(x,y,...){
 
@@ -27,21 +28,22 @@ vec_cast.character.cat_categorical <- function(x,to,...) {
 }
 
 
-#' @method vec_cast.cat_categorical cat_categorical
+#' @method vec_cast.cat_categorical character
 #' @export
 vec_cast.cat_categorical.character <- function(x,to,...) {
   y<-to
-
-  x_values<- unique(x)
+  x_values<- x
+  x_values_unique <- unique(x)
   y_values<-get_active_alternative_level_values(y)
 
   y_levels<-levels(y)
   # set x levels to y levels where active values matched:
-  x_levels <- y_levels[match(x_values,y_values)]
+  x_levels <- y_levels[match(x_values_unique,y_values)]
   # use x value as new levels where no match found:
-  x_levels[is.na(x_levels)]<-x_values[is.na(x_levels)]
-
-  x_categorical<-categorical(x_levels)
+  x_levels[is.na(x_levels)]<-x_values_unique[is.na(x_levels)]
+  # get the real level values for the original data:
+  x_content_levels <- x_levels[match(x,x_values_unique)]
+  x_categorical<-categorical(x_content_levels, x_levels)
   vec_cast.cat_categorical.cat_categorical(x_categorical,y)
 
 }
