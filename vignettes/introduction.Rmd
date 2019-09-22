@@ -95,6 +95,7 @@ my_colors
 you can switch to the alternative value at any time:
 
 ```{r}
+
 my_colors_as_hexcodes<-alternate(my_colors, alternative = 'hexcode')
 my_colors_as_hexcodes
 ```

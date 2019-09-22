@@ -12,7 +12,13 @@
 #'    - it has an attribute for _open alternative values_, allowing the user to add different alternative values, such as labels in different languages
 #'
 
-
+#' take unique values from a vector and remove all NAs
+#' @param x vector
+unique_and_not_na<-function(x){
+  x<-unique(x)
+  x<-x[!is.na(x)]
+  x
+}
 
 #' create a new categorical variable
 #'
@@ -24,13 +30,18 @@
 #' @importFrom vctrs vec_ptype
 #' @importFrom vctrs vec_ptype2
 #' @export
-categorical <- function(x = logical(), levels = unique(unlist(x)), alternatives_internal = tibble::tibble(.rows = length(levels)), ..., class = c()) {
+categorical <- function(x = logical(), levels = unique_and_not_na(x), alternatives_internal = tibble::tibble(.rows = length(levels)), ..., class = c()) {
 
-  assertthat::assert_that(all(unique(unlist(x,use.names = FALSE)) %in% levels))
+
+  assertthat::assert_that(all(unique_and_not_na(unlist(as.character(x),use.names = FALSE)) %in% as.character(levels)))
 
   public_alternatives<-list(...)
 
+
+
+
   # make sure alternatives have same length too:
+
 
   alternative_lengths<-purrr::map_int(alternatives_internal,length)
   bad_length<-(alternative_lengths != length(levels))
@@ -80,8 +91,6 @@ categorical <- function(x = logical(), levels = unique(unlist(x)), alternatives_
                   class = class)
 }
 
-
-
 #' @method levels cat_categorical
 #' @S3method levels cat_categorical
 levels.cat_categorical<-function(x){
@@ -95,13 +104,22 @@ levels.cat_categorical<-function(x){
 #' @param levels list of possible values for x; similar to factor levels. Defaults to the unique values in x
 #' @param alternatives_internal a named list of vectors with alternative values corresponding to 'levels'. Must have the same length as levels. Can be accessed with \code{categorical_alternative}. "internal" alternatives are used to store 'fixed' alternatives for classes extending 'cat_categorical'.
 #' @param alternatives a named list of vectors with alternative values corresponding to 'levels'. Must have the same length as levels. Can be accessed with \code{categorical_alternative}. These "external" alternatives are open to user defined alternatives, for example labels in multiple languages.
-new_categorical <- function(x = logical(), levels,
+new_categorical <- function(x = logical(), levels = unique_and_not_na(x),
                             alternatives_internal = tibble::tibble(.rows = length(levels)),
                             alternatives = tibble::tibble(.rows = length(levels)),multiple_selection = FALSE,
                             class = c(),
                             active_alternative = character(),
                             active_alternative_is_internal = FALSE) {
 
+
+
+  if(any(is.na(levels))){
+    stop("levels can not be NA")
+  }
+
+  if(any(duplicated(levels))){
+    stop("levels must be unique")
+  }
 
   if(length(x)==0){
     logical_fields<-purrr::map(levels,function(x){logical(0)})
@@ -118,6 +136,14 @@ new_categorical <- function(x = logical(), levels,
   if(length(logical_fields)==0 & length(levels)==0){
     logical_fields<-list('0'=logical())
   }
+
+  na_values <- is.na(x)
+  if(any(na_values)){
+
+    logical_fields <- lapply(logical_fields,function(x){x[na_values]<-NA;x})
+  }
+
+
   vctrs::new_rcrd(fields = logical_fields,
                   levels = levels,
                   alternatives_internal = alternatives_internal,
@@ -173,6 +199,7 @@ format.cat_categorical<-function(x, ..., cat = FALSE) {
   invisible(x)
 }
 
+
 #' List all alternative valuse for a categorical vector
 #' @param x a categorical vector
 #' @param internal logical: If TRUE, show internal alternatives only
@@ -181,6 +208,7 @@ format.cat_categorical<-function(x, ..., cat = FALSE) {
 list_alternatives<-function(x,internal = NULL){
   if(is.null(internal)){
     return(list(internal = names(attr(x,'alternatives_internal')), public = names(attr(x,'alternatives'))))
+
   }
   if(internal){
     return(names(attr(x,'alternatives_internal')))
