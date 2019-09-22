@@ -46,7 +46,8 @@ get_active_alternative_level_values<-function(x){
 # vector content ----------------------------------------------------------
 
 
-
+#' get level values
+#' @param x categorical vector
 get_level_values<-function(x){
   x %>%
     mr_logical_matrix %>%

@@ -7,7 +7,9 @@
 new_categorical(x = logical(), levels,
   alternatives_internal = tibble::tibble(.rows = length(levels)),
   alternatives = tibble::tibble(.rows = length(levels)),
-  multiple_selection = FALSE, class = c())
+  multiple_selection = FALSE, class = c(),
+  active_alternative = character(),
+  active_alternative_is_internal = FALSE)
 }
 \arguments{
 \item{x}{a vector or list to be used as values for the categorical vector}

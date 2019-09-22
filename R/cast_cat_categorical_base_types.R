@@ -7,8 +7,9 @@ vec_ptype2.cat_categorical.character<-function(x,y,...){
   vec_ptype2.cat_categorical.cat_categorical(x,y)
 }
 
+# TODO @METHOD NOT OK! (CHAR & CAT_CATEGORICAL)
 
-#' @method vec_ptype2.cat_categorical character
+#' @method vec_ptype2.character cat_categorical character
 #' @export
 vec_ptype2.character.cat_categorical<-function(x,y,...){
 
@@ -27,7 +28,7 @@ vec_cast.character.cat_categorical <- function(x,to,...) {
 }
 
 
-#' @method vec_cast.cat_categorical cat_categorical
+#' @method vec_cast.cat_categorical character
 #' @export
 vec_cast.cat_categorical.character <- function(x,to,...) {
   y<-to
