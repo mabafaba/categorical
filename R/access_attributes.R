@@ -3,9 +3,9 @@
 # levels and alternatives -------------------------------------------------
 
 get_active_alternative_name<-function(x){
-  alt<-attributes(x)$active_alternative
+  alt<-attributes(x)[["active_alternative"]]
   if(length(alt)==0){return(c())}
-  names(alt)<-ifelse(attributes(x)$active_alternative_is_internal,"internal","public")
+  names(alt)<-ifelse(attributes(x)[["active_alternative_is_internal"]],"internal","public")
   if(is.null(alt)){return(character())}
   alt
 }
@@ -58,8 +58,8 @@ get_level_values<-function(x){
     purrr::map(which) %>%
     purrr::map(~ levels(x)[.x]) %>% unname
 
-  restore_lgl_list_NA_in_value_list(list_of_selected_values,x)
-
+  x<-restore_lgl_list_NA_in_value_list(list_of_selected_values,x)
+unlist(x)
 }
 
 

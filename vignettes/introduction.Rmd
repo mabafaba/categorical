@@ -25,7 +25,7 @@ library(tibble)
 
 Categorical Vectors are a basic vector type with the following features:
 
-- they have a fixed set of allowed values called 'levels' (similar to levels in factors)
+- they have a fixed set of allowed values called 'levels' (like factors)
 - they can store alternative values for each level; you can switch back and forth between alternatives.
 - each record in the vector can have more than one level 'selected' to allow storing multipe response data.
 - when printing categorical values, they are wrapped in single quotes (between factors that are printed with no quotes and characters that are printed with double quotes) 
@@ -38,9 +38,11 @@ let's store the days of the week as integer values 1-7, but include labels in tw
 
 mydays <- categorical(c(1,2,1,5,6,3,7),
                                 levels=1:7,
-                                labels_english = c('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'),
-                                labels_german = c('Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'),
-                                day_type = c('week','week','week','week','week','weekend','weekend')
+                                alternatives = list(
+                                  labels_english = c('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'),
+                                  labels_german = c('Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'),
+                                  day_type = c('week','week','week','week','week','weekend','weekend')
+                                )
                                 )
 ```
 
@@ -49,9 +51,9 @@ we can `alternate` between the original and alternative values:
 ```{r}
 
 mydays_en <- alternate(mydays, "labels_english")
-
+mydays_en
 ```
-You can see that the levels remain untouched.
+You can see that the "active" value changed (while the levels remain untouched)
 we can `alternate` back to the original levels if we don't name the alternative:
 
 ```{r}

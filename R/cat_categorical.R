@@ -12,14 +12,6 @@
 #'    - it has an attribute for _open alternative values_, allowing the user to add different alternative values, such as labels in different languages
 #'
 
-#' take unique values from a vector and remove all NAs
-#' @param x vector
-unique_and_not_na<-function(x){
-  x<-unique(x)
-  x<-x[!is.na(x)]
-  x
-}
-
 #' create a new categorical variable
 #'
 #' @param x a vector or list to be used as values for the categorical vector
@@ -30,50 +22,160 @@ unique_and_not_na<-function(x){
 #' @importFrom vctrs vec_ptype
 #' @importFrom vctrs vec_ptype2
 #' @export
-categorical <- function(x = logical(), levels = unique_and_not_na(x), alternatives_internal = tibble::tibble(.rows = length(levels)), ..., class = c()) {
+categorical <- function(x = logical(),
+                        levels = unique_and_not_na(unlist(x)),
+                        alternatives = empty_alternatives(levels),
+                        alternatives_internal = empty_alternatives(levels),
+                        active_alternative = NULL,
+                        active_alternative_is_internal = FALSE,
+                        class = c()) {
+  UseMethod("categorical")
+}
 
 
-  assertthat::assert_that(all(unique_and_not_na(unlist(as.character(x),use.names = FALSE)) %in% as.character(levels)))
+#' create a categorical variable from categorical input
+#' @export
+categorical.categorical <- function(x = logical(),
+                                    levels = levels(x),
+                                    alternatives_internal = NULL,
+                                    alternatives = NULL,
+                                    active_alternative = NULL,
+                                    active_alternative_is_internal = FALSE,
+                                    class = c()){
 
-  public_alternatives<-list(...)
+  # TODO: alternatives argument to this function not used (unclear what the expected behaviour should be here)
+  #       unclear whether those arguments can safely be removed
+  new<-new_categorical(mr_logical_matrix(x),
+                       levels=levels(x),
+                       alternatives = alternatives(x,F),
+                       alternatives_internal = alternatives(x,T),
+                       active_alternative = active_alternative,
+                       active_alternative_is_internal = active_alternative_is_internal,
+                       class = class)
 
 
+  common <- vec_ptype2.cat_categorical.cat_categorical(x,new)
+  vec_cast(x,common)
+}
 
+#' @export
+categorical.default <- function(x = logical(),
+                                levels = unique_and_not_na(unlist(x)),
+                                alternatives = empty_alternatives(levels),
+                                alternatives_internal = empty_alternatives(levels),
+                                active_alternative = NULL,
+                                active_alternative_is_internal = FALSE,
+                                class = c()) {
 
-  # make sure alternatives have same length too:
+  # if x is of length 0, we take a short cut (empty matrix if no levels provided, matrix with no rows and length(levels) columns if levels provided):
+  if(length(x)==0){
+      if(length(levels)==0){
+        logical_fields<-matrix(logical(0), nrow = 0, ncol = 0)
 
+      }else{
+        logical_fields<-purrr::map(levels,function(x){logical(0)}) %>% do.call(cbind,.)
+      }
 
-  alternative_lengths<-purrr::map_int(alternatives_internal,length)
-  bad_length<-(alternative_lengths != length(levels))
-  if(any(bad_length)){
-    stop(paste('internal alternative(s) with wrong length (must be same length as levels):',
-               paste(names(public_alternatives)[bad_length],collapse = " ")))
+      return(categorical.matrix(logical_fields,
+             levels = levels,
+             alternatives,
+             alternatives_internal,
+             class = class)
+      )
+
   }
 
-  alternative_lengths<-purrr::map_int(public_alternatives,length)
-  bad_length<-(alternative_lengths != length(levels))
-  if(any(bad_length)){
-    stop(paste('alternative(s) with wrong length (must be same length as levels):',
-               paste(names(public_alternatives)[bad_length],collapse = " ")))
+
+  if(length(levels)==0 & length(x)!=0){
+    stop("a categorical vector with no levels can not have any values (not even NA)")
   }
 
 
+  # by default, we assume we're dealing with a vector or a list of values (for multiple)
 
-  # values should always be a list in the end (unless it's a logical matrix)
-  if(!is.list(x) & !is.logical(x)){
+  # if vector, make a list so we have only one case to deal with: values should always be a list in the end (unless it's a logical matrix)
+
+
+  assertthat::assert_that(all(unique_and_not_na(unlist(x,use.names = FALSE)) %in% levels))
+
+  if(!is.list(x)){
     x<-as.list(x)
   }
+  # all values in the list should be exist in the levels:
 
-  if(is.logical(x)){
-    if(is.matrix(x)){
-      if(!ncol(x)==length(levels)){stop("to make a categorical vector from a logical matrix, you must provide levels, and the matrix must have one column per level")}
+  # make a logical matrix:
+  logical_fields<-purrr::map(x,function(x){
+    levels %in% x
+  }) %>% do.call(rbind,.) %>% as.matrix
+
+  logical_fields[purrr::map_lgl(x,function(x){any(is.na(x))}),]<-NA
+  categorical.matrix(logical_fields, levels = levels, alternatives, alternatives_internal, class)
+
+}
+
+#' categorical constructors check inputs, convert to matrix and finally should call this function.
+#' @export
+categorical.matrix<-function(x = logical(),
+                             levels,
+                             alternatives = empty_alternatives(levels),
+                             alternatives_internal = empty_alternatives(levels),
+                             active_alternative = NULL,
+                             active_alternative_is_internal = FALSE,
+                             class = c()){
+
+  if(!is.matrix(x)){stop("x must be a matrix")}
+  if(!is.logical(x)){stop("to make a categorical from a matrix, the matrix must be logical")}
+  if(!(ncol(x)==length(levels))){
+    stop("to make a categorical vector from a logical matrix, you must provide levels, and the matrix must have one column per level")
+  }
+
+
+    # matrix to list of logical vectors, named after levels:
+    logical_fields<- x %>% as.data.frame %>% as.list
+    names(logical_fields)<-levels
+
+
+  public_alternatives<-alternatives
+  if(length(public_alternatives)==0){
+    public_alternatives<-NULL
+  }
+  # remove nulls from alternatives
+
+  # make sure alternatives have same length, and match levels:
+
+  public_alternatives<-enforce_alternative_lengths_match_levels(public_alternatives,levels)
+  alternatives_internal<-enforce_alternative_lengths_match_levels(alternatives_internal,levels)
+
+  if(all(purrr::map_lgl(alternatives_internal,is.null))){
+    alternatives_internal<-empty_alternatives(levels)
+  }else{
+    alternative_lengths<-purrr::map_int(alternatives_internal,length)
+    bad_length<-(alternative_lengths != length(levels))
+    if(any(bad_length)){
+      stop(paste('internal alternative(s) with wrong length (must be same length as levels):',
+                 paste(names(public_alternatives)[bad_length],collapse = " ")))
+    }
+  }
+  if(all(purrr::map_lgl(public_alternatives,is.null))){
+    public_alternatives<-empty_alternatives(levels)
+  }else{
+    alternative_lengths<-purrr::map_int(public_alternatives,length)
+    bad_length<-(alternative_lengths != length(levels))
+    if(any(bad_length)){
+      stop(paste('alternative(s) with wrong length (must be same length as levels):',
+                 paste(names(public_alternatives)[bad_length],collapse = " ")))
     }
   }
 
 
+
+
+
+
+
   # alternatives should always be(come) a tibble, and should always have as many rows as levels exist:
   if(is.null(alternatives_internal)){
-    alternatives_internal<-tibble::tibble(.rows = length(levels))
+    alternatives_internal<-empty_alternatives(levels)
   }
 
   alternatives_internal<-tibble::as_tibble(alternatives_internal, .rows = length(levels))
@@ -81,15 +183,48 @@ categorical <- function(x = logical(), levels = unique_and_not_na(x), alternativ
   # public alternatives should always be(come) a tibble, and should always have as many rows as levels exist:
   public_alternatives<-tibble::as_tibble(public_alternatives,.rows = length(levels))
 
-
-
   # all is goood, let's go make a new categorical wohay:
   new_categorical(x = x,
                   levels = levels,
                   alternatives_internal = alternatives_internal,
                   alternatives = public_alternatives,
+                  active_alternative = active_alternative,
+                  active_alternative_is_internal = active_alternative_is_internal,
                   class = class)
+
 }
+
+
+
+
+
+enforce_alternative_lengths_match_levels<-function(alternatives,levels){
+
+  if(is.null(alternatives)){return(alternatives)}
+
+  if(is.data.frame(alternatives)){
+    if(!nrow(alternatives)==length(levels)){
+      stop("all provided alternatives must have exactly one value per categorical level")
+    }
+    return(alternatives)
+  }
+
+  if(is.list(alternatives)){
+    # remove empty elements
+    alternatives[sapply(alternatives, is.null)] <- NULL
+    if(length(alternatives)==0){NULL}
+    # stop if not all remaining have the same length as levels
+    if(!all(purrr::map_dbl(alternatives,vctrs::vec_size) == length(levels))){stop("all provided alternatives must have exactly one value per categorical level")}
+    return(alternatives)
+  }
+ # for data frames, check nrow equals length levels:
+
+
+
+  stop("alternatives must be a list or a data.frame")
+}
+
+
 
 #' @method levels cat_categorical
 #' @S3method levels cat_categorical
@@ -100,13 +235,15 @@ levels.cat_categorical<-function(x){
 
 #' create a new categorical variable
 #'
-#' @param x a vector or list to be used as values for the categorical vector
-#' @param levels list of possible values for x; similar to factor levels. Defaults to the unique values in x
+#' @param x a logical matrix indicating which levels are selected per record (each row is a record, each column corresponds to a level specified in 'level's)
+#' @param levels vector of possible values for x; similar to factor levels. Defaults to the unique values in x. Will be converted to characters
 #' @param alternatives_internal a named list of vectors with alternative values corresponding to 'levels'. Must have the same length as levels. Can be accessed with \code{categorical_alternative}. "internal" alternatives are used to store 'fixed' alternatives for classes extending 'cat_categorical'.
 #' @param alternatives a named list of vectors with alternative values corresponding to 'levels'. Must have the same length as levels. Can be accessed with \code{categorical_alternative}. These "external" alternatives are open to user defined alternatives, for example labels in multiple languages.
-new_categorical <- function(x = logical(), levels = unique_and_not_na(x),
-                            alternatives_internal = tibble::tibble(.rows = length(levels)),
-                            alternatives = tibble::tibble(.rows = length(levels)),multiple_selection = FALSE,
+new_categorical <- function(x = logical(), levels,
+                            alternatives_internal = empty_alternatives(levels),
+                            alternatives = empty_alternatives(levels),
+                            active_alternative = NULL,
+                            active_alternative_is_internal = FALSE,
                             class = c()) {
 
 
@@ -119,36 +256,35 @@ new_categorical <- function(x = logical(), levels = unique_and_not_na(x),
     stop("levels must be unique")
   }
 
-  if(length(x)==0){
-    logical_fields<-purrr::map(levels,function(x){logical(0)})
-  }else if(is.matrix(x) & is.logical(x)){
-    logical_fields<- x %>% as.data.frame %>% as.list
-    names(logical_fields)<-levels
-  }else{
-    logical_fields<-purrr::map(x,function(x){
-      levels %in% x
-    }) %>% do.call(rbind,.) %>% as.data.frame %>% as.list
+  levels <- vctrs::vec_cast(levels,character())
+  if(any(duplicated(levels))){
+    stop("levels must be unique when converted to characters")
   }
 
+  # consistent NAs:
+  x[apply(x,1,function(x){any(is.na(x))}),]<-NA
+
+
+  logical_fields<-x %>% as.data.frame %>% as.list
   names(logical_fields)<-levels
   if(length(logical_fields)==0 & length(levels)==0){
     logical_fields<-list('0'=logical())
   }
 
-  na_values <- is.na(x)
-  if(any(na_values)){
 
-    logical_fields <- lapply(logical_fields,function(x){x[na_values]<-NA;x})
-  }
+  if(!is.matrix(x)){stop("x must be a matrix")}
+  if(!is.logical(x)){stop("x must be logical")}
+
+
 
 
   vctrs::new_rcrd(fields = logical_fields,
                   levels = levels,
                   alternatives_internal = alternatives_internal,
                   alternatives = alternatives,
-                  active_alternative = character(),
-                  active_alternative_is_internal = FALSE,
-                  multiple_selection = multiple_selection,
+                  active_alternative = active_alternative,
+                  active_alternative_is_internal = active_alternative_is_internal,
+                  # multiple_selection = multiple_selection,
                   class = c(class, "cat_categorical"))
 
 }
@@ -172,7 +308,21 @@ as_categorical<-categorical
 format.cat_categorical<-function(x, ..., cat = FALSE) {
   x<-get_active_values(x)
   single_selection<-all(purrr::map_int(x,length)==1)
-  if(single_selection){return(invisible(paste0("'",as.character(unlist(x)),"'")))}
+
+  paste0_keepNA<-function(...){
+    topaste<-list(...)
+    longest_length<-max(purrr::map_dbl(topaste,length))
+    topaste_samelength<-lapply(topaste,vec_recycle,longest_length)
+    nas <- lapply(topaste_samelength,is.na)
+    any_nas <- nas %>% as.data.frame %>% apply(1,function(x){any((x))})
+
+    pasted<-paste0(...)
+    pasted[any_nas]<-NA
+    pasted
+
+  }
+
+  if(single_selection){return(invisible(paste0_keepNA("'",as.character(unlist(x)),"'")))}
   x<-purrr::map_chr(x,function(x){
     x<-as.character(unclass(x))
     if(cat){
@@ -180,14 +330,14 @@ format.cat_categorical<-function(x, ..., cat = FALSE) {
         # number of selected items
         crayon::silver(crayon::italic(paste0(" (",length(x),") "))),
         # concatenated choices
-        paste0("'",x,"'", collapse = crayon::silver(crayon::italic(" & ")))
+        paste0_keepNA("'",x,"'", collapse = crayon::silver(crayon::italic(" & ")))
       )
     }else{
       paste0(
         # number of selected items
         paste0(" (",length(x),") "),
         # concatenated choices
-        paste0("'",x,"'", collapse = (" & "))
+        paste0_keepNA("'",x,"'", collapse = (" & "))
       )
     }
 
@@ -216,8 +366,8 @@ list_alternatives<-function(x,internal = NULL){
 
 set_active_alternative<-function(x,alternative = character(), internal = FALSE){
 
-  attributes(x)$active_alternative<-alternative
-  attributes(x)$active_alternative_is_internal<-internal
+  attributes(x)[['active_alternative']]<-alternative
+  attributes(x)[['active_alternative_is_internal']]<-internal
   x
 
 }
@@ -237,7 +387,7 @@ superficial_nas<-function(x){
 
 
 #' Set categorical vector to alternative vales
-#' @param x categorical vector (see \link{\code{categorical()}})
+#' @param x categorical vector (see [categorical()])
 #' @param alternative the alternative value as a string
 #' @return the original vector, but its active values are replaced by the alternative
 #' @export
@@ -275,8 +425,8 @@ alternate <- function(x,alternative = c(), internal = FALSE){
     warning(paste0(
       "superficial NAs produced (see ?superficial_nas). selected alternative has no values defined for these levels:",
       "'",paste0(NA_level_names,collapse = '\', \''),"'"
-      )
-      )
+    )
+    )
 
 
   }
@@ -372,7 +522,22 @@ as.matrix.cat_categorical<-function(x){
 
 has_multiple_response<-function(x){
   if(!is_categorical(x)){stop('not a categorical vector')}
-  !all(apply(mr_logical_matrix(x),1,function(x){length(which(x))})==1)
+  count_selected <- apply(mr_logical_matrix(x),1,function(x){sum(x)})
+  any_record_not_na_and_not_selected_exactly_one <- any(count_selected[!is.na(count_selected)])!=1
+  return(any_record_not_na_and_not_selected_exactly_one)
 }
 
 
+
+#' take unique values from a vector and remove all NAs
+#' @param x vector
+unique_and_not_na<-function(x){
+  x<-unique(x)
+  x<-x[!is.na(x)]
+  x
+}
+
+
+empty_alternatives<-function(levels){
+  tibble::tibble(.rows = length(levels))
+}

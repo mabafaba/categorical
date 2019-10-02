@@ -42,6 +42,7 @@ vec_cast.cat_categorical.character <- function(x,to,...) {
   x_levels[is.na(x_levels)]<-x_values[is.na(x_levels)]
 
   x_categorical<-categorical(x_levels)
+
   vec_cast.cat_categorical.cat_categorical(x_categorical,y)
 
 }

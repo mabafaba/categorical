@@ -4,13 +4,13 @@
 \alias{new_categorical}
 \title{create a new categorical variable}
 \usage{
-new_categorical(x = logical(), levels,
+new_categorical(x = logical(), levels = unique_and_not_na(x),
   alternatives_internal = tibble::tibble(.rows = length(levels)),
   alternatives = tibble::tibble(.rows = length(levels)),
   multiple_selection = FALSE, class = c())
 }
 \arguments{
-\item{x}{a vector or list to be used as values for the categorical vector}
+\item{x}{a logical matrix indicating which levels are selected per record (each row is a record, each column corresponds to a level specified in 'level's)}
 
 \item{levels}{list of possible values for x; similar to factor levels. Defaults to the unique values in x}
 
