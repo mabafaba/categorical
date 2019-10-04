@@ -12,9 +12,25 @@ vec_ptype2.cat_categorical.cat_categorical<-function(x,y,...){
   out_values<-list()
   out_alternatives<-join_alternatives(x,y,FALSE)
   out_alternatives_internal<-join_alternatives(x,y,TRUE)
+
+
+  active_alt_x_name<-get_active_alternative_name(x)
+  active_alt_y_name<-get_active_alternative_name(y)
+  if(length(active_alt_y_name)==0){
+    out_active_alternative <- active_alt_x_name
+    out_active_alternative_is_internal <-   get_active_alternative_is_internal(x)
+  }else{
+    out_active_alternative <- active_alt_y_name
+    out_active_alternative_is_internal <-   FALSE
+  }
+
+
   new_categorical(matrix(logical(),nrow = 0,ncol = length(out_levels)),levels = out_levels,
                   alternatives_internal = out_alternatives_internal,
-                  alternatives = out_alternatives
+                  alternatives = out_alternatives,
+                  active_alternative = out_active_alternative,
+                  active_alternative_is_internal = out_active_alternative_is_internal
+
                   # multiple_selection = out_multiple_selection
                   )
 }
@@ -44,8 +60,10 @@ vec_cast.cat_categorical.cat_categorical <- function(x,to,...) {
   categorical(x = out_values,
                   levels = out_levels,
                   alternatives_internal = out_alternatives_internal,
-                  alternatives = out_alternatives
-                  # multiple_selection = out_multiple_selection
+                  alternatives = out_alternatives,
+                  active_alternative = out_active_alternative,
+                  active_alternative_is_internal = out_active_alternative_is_internal,
+                  class = class(to)[!(class(to)%in%class(categorical()))]
               )
 
 }

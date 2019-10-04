@@ -4,9 +4,9 @@
 \alias{categorical.categorical}
 \title{create a categorical variable from categorical input}
 \usage{
-\method{categorical}{categorical}(x = logical(),
-  levels = unique_and_not_na(x),
-  alternatives_internal = tibble::tibble(.rows = length(levels)), ...,
+\method{categorical}{categorical}(x = logical(), levels = levels(x),
+  alternatives_internal = NULL, alternatives = NULL,
+  active_alternative = NULL, active_alternative_is_internal = FALSE,
   class = c())
 }
 \description{

@@ -5,7 +5,9 @@
 \title{categorical constructors check inputs, convert to matrix and finally should call this function.}
 \usage{
 \method{categorical}{matrix}(x = logical(), levels,
-  alternatives_internal = tibble::tibble(.rows = length(levels)), ...,
+  alternatives = empty_alternatives(levels),
+  alternatives_internal = empty_alternatives(levels),
+  active_alternative = NULL, active_alternative_is_internal = FALSE,
   class = c())
 }
 \description{

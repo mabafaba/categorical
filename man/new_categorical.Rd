@@ -4,15 +4,15 @@
 \alias{new_categorical}
 \title{create a new categorical variable}
 \usage{
-new_categorical(x = logical(), levels = unique_and_not_na(x),
-  alternatives_internal = tibble::tibble(.rows = length(levels)),
-  alternatives = tibble::tibble(.rows = length(levels)),
-  multiple_selection = FALSE, class = c())
+new_categorical(x = logical(), levels,
+  alternatives_internal = empty_alternatives(levels),
+  alternatives = empty_alternatives(levels), active_alternative = NULL,
+  active_alternative_is_internal = FALSE, class = c())
 }
 \arguments{
 \item{x}{a logical matrix indicating which levels are selected per record (each row is a record, each column corresponds to a level specified in 'level's)}
 
-\item{levels}{list of possible values for x; similar to factor levels. Defaults to the unique values in x}
+\item{levels}{vector of possible values for x; similar to factor levels. Defaults to the unique values in x. Will be converted to characters}
 
 \item{alternatives_internal}{a named list of vectors with alternative values corresponding to 'levels'. Must have the same length as levels. Can be accessed with \code{categorical_alternative}. "internal" alternatives are used to store 'fixed' alternatives for classes extending 'cat_categorical'.}
 

@@ -13,7 +13,9 @@ cat_categorical is:
    - it has an attribute for _open alternative values_, allowing the user to add different alternative values, such as labels in different languages}
 \usage{
 categorical(x = logical(), levels = unique_and_not_na(unlist(x)),
-  alternatives_internal = tibble::tibble(.rows = length(levels)), ...,
+  alternatives = empty_alternatives(levels),
+  alternatives_internal = empty_alternatives(levels),
+  active_alternative = NULL, active_alternative_is_internal = FALSE,
   class = c())
 }
 \arguments{

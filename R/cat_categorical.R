@@ -78,8 +78,10 @@ categorical.default <- function(x = logical(),
 
       return(categorical.matrix(logical_fields,
              levels = levels,
-             alternatives,
-             alternatives_internal,
+             alternatives = alternatives,
+             alternatives_internal = alternatives_internal,
+             active_alternative = active_alternative,
+             active_alternative_is_internal = active_alternative_is_internal,
              class = class)
       )
 
@@ -109,7 +111,13 @@ categorical.default <- function(x = logical(),
   }) %>% do.call(rbind,.) %>% as.matrix
 
   logical_fields[purrr::map_lgl(x,function(x){any(is.na(x))}),]<-NA
-  categorical.matrix(logical_fields, levels = levels, alternatives, alternatives_internal, class)
+  categorical.matrix(logical_fields,
+                     levels = levels,
+                     alternatives = alternatives,
+                     alternatives_internal = alternatives_internal,
+                     active_alternative = active_alternative,
+                     active_alternative_is_internal = active_alternative_is_internal,
+                     class)
 
 }
 

@@ -13,7 +13,10 @@ vec_ptype2.cat_categorical.character<-function(x,y,...){
 vec_ptype2.character.cat_categorical<-function(x,y,...){
 
   x<-categorical(x)
-  vec_ptype2.cat_categorical.cat_categorical(x,y)
+  # passing y first so that new levels from characters are always added in the end;
+  # if we don't do that this fails: 'a' ==categorical(c('b','c'))
+  # because casting the two sides into each other doesn't return identical types (different order of levels)
+  vec_ptype2.cat_categorical.cat_categorical(y,x)
 }
 
 
