@@ -59,7 +59,10 @@ get_level_values<-function(x){
     purrr::map(~ levels(x)[.x]) %>% unname
 
   x<-restore_lgl_list_NA_in_value_list(list_of_selected_values,x)
-unlist(x)
+  if(all(purrr::map_dbl(x,length)==1)){
+    x<-unlist(x)
+  }
+  return(x)
 }
 
 
@@ -83,9 +86,11 @@ get_active_values<-function(x){
     purrr::map(which) %>%
     purrr::map(~ unname(unlist(alternative_values[.x,alternative])))
 
-  restore_lgl_list_NA_in_value_list(active_values,x)
+  active_values <- restore_lgl_list_NA_in_value_list(active_values,x)
 
-
+  if(all(purrr::map_dbl(active_values,length)==1)){
+    x<-unlist(x)
+  }
 
   return(active_values)
 }
@@ -102,15 +107,15 @@ restore_lgl_list_NA_in_value_list<-function(value_list, x_categorical){
     t %>%
     as.data.frame
 
-any_NA_in_lgl_matrix<- purrr::map_lgl(values_as_logical_df,function(x){any(is.na(x))})
-purrr::map2(value_list,any_NA_in_lgl_matrix,function(values,should_be_na){
-  if(should_be_na){
-    return(NA)
-  }
-  else{
-    return(values)
-  }
+  any_NA_in_lgl_matrix<- purrr::map_lgl(values_as_logical_df,function(x){any(is.na(x))})
+  purrr::map2(value_list,any_NA_in_lgl_matrix,function(values,should_be_na){
+    if(should_be_na){
+      return(NA)
+    }
+    else{
+      return(values)
+    }
 
-})
+  })
 
 }

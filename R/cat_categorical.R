@@ -317,14 +317,14 @@ format.cat_categorical<-function(x, ..., cat = FALSE) {
   x<-get_active_values(x)
   single_selection<-all(purrr::map_int(x,length)==1)
 
-  paste0_keepNA<-function(...){
+  paste0_keepNA<-function(...,collapse = NULL){
     topaste<-list(...)
     longest_length<-max(purrr::map_dbl(topaste,length))
     topaste_samelength<-lapply(topaste,vec_recycle,longest_length)
     nas <- lapply(topaste_samelength,is.na)
-    any_nas <- nas %>% as.data.frame %>% apply(1,function(x){any((x))})
+    any_nas <- nas %>% as.data.frame %>% apply(1,function(x){any((x))}) %>% any
 
-    pasted<-paste0(...)
+    pasted<-paste0(...,collapse = collapse)
     pasted[any_nas]<-NA
     pasted
 
@@ -333,17 +333,24 @@ format.cat_categorical<-function(x, ..., cat = FALSE) {
   if(single_selection){return(invisible(paste0_keepNA("'",as.character(unlist(x)),"'")))}
   x<-purrr::map_chr(x,function(x){
     x<-as.character(unclass(x))
+    if(length(x)==0){
+      if(!cat){return(invisible(paste0("(0)")))}else{
+        crayon::silver(crayon::italic(paste0(" (",length(x),") ")))
+      }
+
+
+    }
     if(cat){
       paste0(
         # number of selected items
-        crayon::silver(crayon::italic(paste0(" (",length(x),") "))),
+        ifelse(!any(is.na(x)),crayon::silver(crayon::italic(paste0(" (",length(x),") "))),""),
         # concatenated choices
         paste0_keepNA("'",x,"'", collapse = crayon::silver(crayon::italic(" & ")))
       )
     }else{
       paste0(
         # number of selected items
-        paste0(" (",length(x),") "),
+        ifelse(!any(is.na(x)),paste0(" (",length(x),") "),""),
         # concatenated choices
         paste0_keepNA("'",x,"'", collapse = (" & "))
       )

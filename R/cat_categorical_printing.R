@@ -7,7 +7,7 @@ print.cat_categorical<-function(x, ...) {
     if(length(levels_text)==0){
       levels_text<-"(no levels)"
     }else{
-      levels_text<-paste('levels:',paste0(levels_text,collapse = ' '))
+      levels_text<-paste('levels:',paste0(levels_text,collapse = ' '),"\n")
 
     }
     if(length(x)==0){cat(crayon::silver(paste0('categorical vector of length 0\n',levels_text)))

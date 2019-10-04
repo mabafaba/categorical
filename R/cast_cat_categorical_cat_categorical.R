@@ -44,6 +44,16 @@ vec_cast.cat_categorical.cat_categorical <- function(x,to,...) {
   out_values<-join_values(x,vec_ptype(y), levels = out_levels)
   out_alternatives<-join_alternatives(x,y,FALSE)
   out_alternatives_internal<-join_alternatives(x,y,TRUE)
+  level_order <- order(out_levels)
+
+  if(!all(out_levels == out_levels[level_order])){
+    warning("reordered categorical vector levels!")
+  }
+
+  out_levels<-out_levels[level_order]
+  out_alternatives_internal <- out_alternatives_internal[ level_order, ]
+  out_alternatives <- out_alternatives[ level_order, ]
+
   # out_multiple_selection<-has_multiple_response(x) | has_multiple_response(y)
   active_alt_x_name<-get_active_alternative_name(x)
   active_alt_to_name<-get_active_alternative_name(to)

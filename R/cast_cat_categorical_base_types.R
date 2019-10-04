@@ -16,7 +16,7 @@ vec_ptype2.character.cat_categorical<-function(x,y,...){
   # passing y first so that new levels from characters are always added in the end;
   # if we don't do that this fails: 'a' ==categorical(c('b','c'))
   # because casting the two sides into each other doesn't return identical types (different order of levels)
-  vec_ptype2.cat_categorical.cat_categorical(y,x)
+  vec_ptype2.cat_categorical.cat_categorical(x,y)
 }
 
 
@@ -36,11 +36,12 @@ vec_cast.cat_categorical.character <- function(x,to,...) {
   y<-to
 
   x_values<- unique(x)
+
   y_values<-get_active_alternative_level_values(y)
 
   y_levels<-levels(y)
   # set x levels to y levels where active values matched:
-  x_levels <- y_levels[match(x_values,y_values)]
+  x_levels <- y_levels[match(x,y_values)]
   # use x value as new levels where no match found:
   x_levels[is.na(x_levels)]<-x_values[is.na(x_levels)]
 

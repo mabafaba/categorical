@@ -82,7 +82,10 @@ library(dplyr)
 
 my_colors <- categorical(x = c("red","blue" , "red","red", "blue"), 
                          levels =  c("red", "green", "blue"),
-                         hexcode = c("#FF0000","#00FF00","#0000FF"))
+                         alternatives = list(
+                           hexcode = c("#FF0000","#00FF00","#0000FF")
+                         )
+)
 
 my_colors                
 
@@ -114,8 +117,11 @@ Note that multiple 'original' values can have the same alternative; one 'origina
 
 my_colors <- categorical(x = c("red","blue" , "red","red", "blue"), 
                          levels =  c("red", "green", "blue"),
-                         hexcode = c("#FF0000","#00FF00","#0000FF"),
-                         temperature = c('warm', 'cool', 'cool'))
+                         alternatives = list(
+                           hexcode = c("#FF0000","#00FF00","#0000FF"),
+                           temperature = c('warm', 'cool', 'cool')
+                         )
+)
 
 
 color_temp <- alternate(my_colors, 'temperature')
@@ -167,7 +173,8 @@ levels(many_favourite_colours)
 ```{r}
 # colors ordered by wavelength
 my_lightwaves<-ordinal(x = c('red','infra','violet','blue','red', 'infra'),
-                levels = c('violet','blue','red', 'infra'),rank = c(1,2,3,4))
+                levels = c('violet','blue','red', 'infra'),
+                alternatives = list(rank = c(1,2,3,4)))
 
 my_lightwaves
 
@@ -181,7 +188,8 @@ my_lightwaves<-ordinal(x = list(c('red','infra'),
                                 'violet',
                                 c('blue','red'),
                                 'infra'),
-                levels = c('violet','blue','red', 'infra'),rank = c(1,2,3,4))
+                levels = c('violet','blue','red', 'infra'),
+                alternatives = list(rank = c(1,2,3,4)))
 
 
 
