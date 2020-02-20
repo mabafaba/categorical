@@ -4,12 +4,22 @@ context("c()")
 
 context('c() - create')
 empty<-categorical()
-simple1<-categorical(x = c(1,2,1,3),levels = 1:5,letters = letters[1:5], LETTERS = LETTERS[1:5], messy = c(T,1,"", NA, 'NA'))
-simple2<-categorical(x=letters[c(1,1,6,6,5,5,9,9,9,10)],levels=letters[1:10],numbers = 1:10,lgl=rep(c(TRUE,FALSE),5))
-simple2.2<-categorical(x=letters[c(1,1,10,5,5,5,9,9,9,10)],levels=letters[c(1:5,7:11)],numbers = 10:1,lgl=rep(c(TRUE,FALSE),5))
+simple1<-categorical(x = c(1,2,1,3),levels = 1:5,
+                     list(letters = letters[1:5],
+                          LETTERS = LETTERS[1:5],
+                          messy = c(T,1,"", NA, 'NA')))
+
+simple2<-categorical(x=letters[c(1,1,6,6,5,5,9,9,9,10)],
+                     levels=letters[1:10],
+                     list(numbers = 1:10,
+                          lgl=rep(c(TRUE,FALSE),5)))
+
+simple2.2<-categorical(x=letters[c(1,1,10,5,5,5,9,9,9,10)],levels=letters[c(1:5,7:11)],
+                       list(numbers = 10:1,lgl=rep(c(TRUE,FALSE),5)))
 
 
 context('c() - use c()')
+
 empty_empty <- c(empty,empty)
 empty_simple1<-c(empty,simple1)
 empty_simple2<-c(empty,simple2)

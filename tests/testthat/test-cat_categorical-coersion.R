@@ -4,14 +4,15 @@ testthat::test_that("coersion - character --> categorical",{
 
   mydays <- categorical(c(1,2,1,5,6,3,7),
                         levels=1:7,
-                        labels_english = c('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'),
-                        labels_german = c('Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag')
+                        alternatives = list(
+                          labels_english = c('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'),
+                          labels_german = c('Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'))
   )
   mydays_en<-alternate(mydays,'labels_english')
 
 
   x<-c('Monday','Tuesday')
-  coerced <- vec_cast.cat_categorical.character(x,mydays_en)
+  coerced <- categorical:::vec_cast.cat_categorical.character(x,mydays_en)
 
   expect_equal(as.character(levels(coerced)),as.character(1:7))
 })

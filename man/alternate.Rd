@@ -7,7 +7,7 @@
 alternate(x, alternative = c(), internal = FALSE)
 }
 \arguments{
-\item{x}{categorical vector (see \link{\code{categorical()}})}
+\item{x}{categorical vector (see [categorical()])}
 
 \item{alternative}{the alternative value as a string}
 }
