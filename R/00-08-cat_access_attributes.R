@@ -1,4 +1,15 @@
 
+alternatives<-function(x, internal = FALSE){
+  if(!is_categorical(x)){stop("not a <categorical> vector")}
+  if(!internal){
+    return(attributes(x)$alternatives)
+  }
+
+  return(attributes(x)$alternatives_internal)
+}
+
+
+
 
 # levels and alternatives -------------------------------------------------
 
@@ -15,6 +26,8 @@ get_active_alternative_is_internal<-function(x){
   if(length(get_active_alternative_name(x))==0){return(FALSE)}
   return(attributes(x)$active_alternative_is_internal)
 }
+
+
 
 #' @method levels cat_ordinal
 #' @S3method levels cat_ordinal
@@ -44,9 +57,6 @@ get_active_alternative_level_values<-function(x){
 
 
 # vector content ----------------------------------------------------------
-
-
-
 
 get_level_values<-function(x){
   values_as_logical_df <- x %>%

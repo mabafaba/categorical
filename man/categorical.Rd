@@ -23,9 +23,15 @@ categorical(x = logical(), levels = NULL,
 
 \item{levels}{list of possible values for x; similar to factor levels}
 
-\item{alternatives_internal}{a named list of vectors with alternative values corresponding to 'levels'. Must have the same length as levels. Can be accessed with \code{categorical_alternative}. "internal" alternatives are used to store 'fixed' alternatives for classes extending 'cat_categorical'.}
+\item{alternatives}{a named list of vectors with alternative values corresponding to 'levels'. Must have the same length as levels. Can be accessed with \code{\link{alternate}}.}
 
-\item{...}{named vectors with alternative values corresponding to 'levels'. Must each have the same length as levels. Can be accessed with \code{categorical_alternative}. These "external" alternatives are open to user defined alternatives, for example labels in multiple languages.}
+\item{alternatives_internal}{a named list of vectors with alternative values corresponding to 'levels'. Must have the same length as levels. Can be accessed with \code{alternate}. "internal" alternatives are used to store 'fixed' alternatives for classes extending 'cat_categorical'.}
+
+\item{active_alternative}{alternative to be used for display}
+
+\item{ative_alternative_is_internal}{whether the active alternative is internal}
+
+\item{...}{named vectors with alternative values corresponding to 'levels'. Must each have the same length as levels. Can be accessed with \code{alternate}. These "external" alternatives are open to user defined alternatives, for example labels in multiple languages.}
 }
 \description{
 create a new categorical variable

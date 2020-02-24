@@ -10,7 +10,7 @@ The set of automatic coercions is usually quite small
 because too many tend to make code harder to reason about
 and silently propagate mistakes.}
 \usage{
-vec_ptype.cat_categorical(x)
+\method{vec_ptype}{cat_categorical}(x)
 }
 \description{
 each combo of our class and other classes that can be coerced toghether has
@@ -29,4 +29,5 @@ individual dispatches like this:
 
 #' @method vec_cast.CLASS1 CLASS2
 #' @export
+cat_categorical & cat_categorical:
 }

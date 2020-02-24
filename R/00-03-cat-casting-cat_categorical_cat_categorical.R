@@ -32,7 +32,7 @@ vec_ptype2.cat_categorical.cat_categorical<-function(x,y,...){
                   active_alternative_is_internal = out_active_alternative_is_internal
 
                   # multiple_selection = out_multiple_selection
-                  )
+  )
 }
 
 
@@ -72,13 +72,13 @@ vec_cast.cat_categorical.cat_categorical <- function(x,to,...) {
 
 
   categorical(x = out_values,
-                  levels = out_levels,
-                  alternatives_internal = out_alternatives_internal,
-                  alternatives = out_alternatives,
-                  active_alternative = out_active_alternative,
-                  active_alternative_is_internal = out_active_alternative_is_internal,
-                  class = class(to)[!(class(to)%in%class(categorical()))]
-              )
+              levels = out_levels,
+              alternatives_internal = out_alternatives_internal,
+              alternatives = out_alternatives,
+              active_alternative = out_active_alternative,
+              active_alternative_is_internal = out_active_alternative_is_internal,
+              class = class(to)[!(class(to)%in%class(categorical()))]
+  )
 
 }
 
@@ -148,7 +148,7 @@ join_alternatives<-function(x,y,internal = FALSE){
   if(length(new_alternative_names)!=0){
     warning(paste0('created new names for alternatives due to conflicting values: ',paste0(new_alternative_names,collapse = ', ')))
   }
-    joined_alternatives <- repair_joint_alternatives(x,y,joined_alternatives)
+  joined_alternatives <- repair_joint_alternatives(x,y,joined_alternatives)
 
 
   # remove temporary column that was used to match on levels:
@@ -160,13 +160,18 @@ join_alternatives<-function(x,y,internal = FALSE){
 repair_joint_alternatives<-function(x,y,joined_alternatives){
 
 
+  # prevent R CMD CHECK warning 'no visible binding'
+  `____LEVELS_CAT_CATEG_IN_vec_ptype2.cat_categorical.cat_categorical_JOIN_324895683247659__`<-NULL
 
   alternatives_no_duplicate_levels <-
-    joined_alternatives %>%
-    dplyr::group_by(`____LEVELS_CAT_CATEG_IN_vec_ptype2.cat_categorical.cat_categorical_JOIN_324895683247659__`) %>%
-    dplyr::summarise_all(dplyr::first)
 
-  # the group_by %>% summarise_all messed up the order, so:
+    dplyr::summarise_all(
+      dplyr::group_by(joined_alternatives,
+                      `____LEVELS_CAT_CATEG_IN_vec_ptype2.cat_categorical.cat_categorical_JOIN_324895683247659__`
+      )
+      ,dplyr::first)
+
+  # the group_by >%> summarise_all messed up the order, so:
   alternatives_no_duplicate_levels <- alternatives_no_duplicate_levels[match(join_levels(x,y),
                                                                              alternatives_no_duplicate_levels[["____LEVELS_CAT_CATEG_IN_vec_ptype2.cat_categorical.cat_categorical_JOIN_324895683247659__"]]
   ),]
@@ -230,10 +235,16 @@ alternative_conflicts<-function(alt_x,alt_y,levels_x,levels_y){
   alternative_missmatches<-purrr::map2(alternative_missmatches,names(alternative_missmatches),function(x,var){
     if(length(x)>0){return(data.frame(var = var,missmatch = TRUE,levels_text = paste0(x,collapse = c(', ')),stringsAsFactors = FALSE))}
     return(data.frame(var = var, missmatch = FALSE, levels_text = "",stringsAsFactors = FALSE))
-  }) %>% do.call(rbind,.)
+  })
+
+  alternative_missmatches <-  do.call(rbind,alternative_missmatches)
+
+  # prevent 'no visible binding' R CMD CHECK warning:
+
+  missmatch<-NULL
 
   if(any(alternative_missmatches$missmatch)){
-    alternative_missmatches<-alternative_missmatches %>% dplyr::filter(missmatch)
+    alternative_missmatches<- dplyr::filter(alternative_missmatches, missmatch)
     unmatchable_alternative_variables<-alternative_missmatches$var
     # message_text<- paste0('Joining categorical vectors: Alternatives with the same name have different values assigned to the same levels and will be renamed; affected:\n',
     #                        paste0(unmatchable_alternative_variables,": ", alternative_missmatches$levels_text[alternative_missmatches$missmatch],collapse = "\n"))

@@ -27,7 +27,7 @@ new_interval<-function(lower, upper, closed = c(TRUE,FALSE),levels,levels_lower,
 
   levels<-interval_matrix_to_levels(levels_matrix)
 
-  alternatives_internal<-tibble(lower=levels_matrix[,1],
+  alternatives_internal<-tibble::tibble(lower=levels_matrix[,1],
                        upper=levels_matrix[,2],
                        lower_closed = rep(closed[1],nrow(levels_matrix)),
                        upper_closed = rep(closed[1],nrow(levels_matrix))

@@ -1,23 +1,37 @@
 
-
-
-#' cat_categorical is the meta class that gives the general structure for the more specific categorical classes that extend it.
+#' cat_categorical is the main vector class. It gives a general structure from which the more specific categorical classes can be constructed.
 #' cat_categorical is:
-#'    - a vctrs_vctr
-#'    - values are generally stored as a list (to allow select multiple and other more complex subclasses)
-#'    - it has an attribute for levels / allowed values.
-#'    - it has an attribute for _closed alternative values_. what these are depends on the specific sublass; for example these could be:
-#'        - character labels (select)
-#'        - integer rank (ordinal)
-#'    - it has an attribute for _open alternative values_, allowing the user to add different alternative values, such as labels in different languages
-#'
+#'    - a standard vctrs_vctr vctrs_rcrd (see vctrs package), with a logical vector for each level, indicating which levels were selected for each entry
+#'    - the 'main' values are a character strings
+#'    - it has a 'levels' attribute with a vector containing all unique categories
+#'    - it has an attribute for _alternative values_, allowing the user to add different alternative values, such as labels in different languages
+#'    - it has an attribute for _internal alternative values_ intended for use in specific subclasses. What these are depends on the specific sublass; for example these could be:
+#'        - for an "interval" subclass: lower and upper limit
+#'        - for an "ordinal" subclass: integer rank
+
+
+#' it follows the generic methods to create categorical() vectors from different data types.
+#' for most types, we
+#' - check if the inputs are valid
+#' - convert the input to a logical matrix
+#' - then use categorical.matrix(), which
+#'   - checks that the inputs are still valid
+#'   - converts inputs to what they should be like for the final attributes
+#'   - call new_categorical()
+#'     - which creates the final vector with vctrs::new_rcrd()
+#' -
+
+
 
 #' create a new categorical variable
 #'
 #' @param x a vector or list to be used as values for the categorical vector
 #' @param levels list of possible values for x; similar to factor levels
-#' @param alternatives_internal a named list of vectors with alternative values corresponding to 'levels'. Must have the same length as levels. Can be accessed with \code{categorical_alternative}. "internal" alternatives are used to store 'fixed' alternatives for classes extending 'cat_categorical'.
-#' @param ... named vectors with alternative values corresponding to 'levels'. Must each have the same length as levels. Can be accessed with \code{categorical_alternative}. These "external" alternatives are open to user defined alternatives, for example labels in multiple languages.
+#' @param alternatives a named list of vectors with alternative values corresponding to 'levels'. Must have the same length as levels. Can be accessed with \code{\link{alternate}}.
+#' @param alternatives_internal a named list of vectors with alternative values corresponding to 'levels'. Must have the same length as levels. Can be accessed with \code{alternate}. "internal" alternatives are used to store 'fixed' alternatives for classes extending 'cat_categorical'.
+#' @param active_alternative alternative to be used for display
+#' @param ative_alternative_is_internal whether the active alternative is internal
+#' @param ... named vectors with alternative values corresponding to 'levels'. Must each have the same length as levels. Can be accessed with \code{alternate}. These "external" alternatives are open to user defined alternatives, for example labels in multiple languages.
 #' @importFrom vctrs vec_ptype
 #' @importFrom vctrs vec_ptype2
 #' @importFrom vctrs vec_ptype2.character
@@ -35,99 +49,63 @@ categorical <- function(x = logical(),
 }
 
 
-#' create a categorical variable from categorical input
-#' @export
-categorical.cat_categorical <- function(x = logical(),
-                                    levels = NULL,
-                                    alternatives = NULL,
-                                    alternatives_internal = NULL,
-                                    active_alternative = NULL,
-                                    active_alternative_is_internal = FALSE,
-                                    class = c()){
+#' create a new categorical variable
+#'
+#' @param x a logical matrix indicating which levels are selected per record (each row is a record, each column corresponds to a level specified in 'level's)
+#' @param levels vector of possible values for x; similar to factor levels. Defaults to the unique values in x. Will be converted to characters
+#' @param alternatives_internal a named list of vectors with alternative values corresponding to 'levels'. Must have the same length as levels. Can be accessed with \code{categorical_alternative}. "internal" alternatives are used to store 'fixed' alternatives for classes extending 'cat_categorical'.
+#' @param alternatives a named list of vectors with alternative values corresponding to 'levels'. Must have the same length as levels. Can be accessed with \code{categorical_alternative}. These "external" alternatives are open to user defined alternatives, for example labels in multiple languages.
+new_categorical <- function(x = logical(), levels,
+                            alternatives_internal = empty_alternatives(levels),
+                            alternatives = empty_alternatives(levels),
+                            active_alternative = NULL,
+                            active_alternative_is_internal = FALSE,
+                            class = c()) {
 
-  if(is.null(levels)){
-    levels <- levels(x)
+
+
+  if(any(is.na(levels))){
+    stop("levels can not be NA")
   }
-  # TODO: alternatives argument to this function not used (unclear what the expected behaviour should be here)
-  #       unclear whether those arguments can safely be removed
-  new<-categorical.matrix(as.matrix(x),
-                       # levels=levels(x),
-                       # alternatives = alternatives(x,F),
-                       # alternatives_internal = alternatives(x,T),
-                       levels=levels,
-                       alternatives = alternatives,
-                       alternatives_internal = alternatives_internal,
-                       active_alternative = active_alternative,
-                       active_alternative_is_internal = active_alternative_is_internal,
-                       class = class)
+
+  if(any(duplicated(levels))){
+    stop("levels must be unique")
+  }
+
+  levels <- vctrs::vec_cast(levels,character())
+  if(any(duplicated(levels))){
+    stop("levels must be unique when converted to characters")
+  }
+
+  # consistent NAs:
+  x[apply(x,1,function(x){any(is.na(x))}),]<-NA
 
 
-  common <- vec_ptype2.cat_categorical.cat_categorical(x,new)
-  vec_cast(x,common)
+  logical_fields<-x %>% as.data.frame %>% as.list
+  names(logical_fields)<-levels
+  if(length(logical_fields)==0 & length(levels)==0){
+    logical_fields<-list('0'=logical())
+  }
+
+
+  if(!is.matrix(x)){stop("x must be a matrix")}
+  if(!is.logical(x)){stop("x must be logical")}
+
+
+
+
+  vctrs::new_rcrd(fields = logical_fields,
+                  levels = levels,
+                  alternatives_internal = alternatives_internal,
+                  alternatives = alternatives,
+                  active_alternative = active_alternative,
+                  active_alternative_is_internal = active_alternative_is_internal,
+                  # multiple_selection = multiple_selection,
+                  class = c(class, "cat_categorical"))
+
 }
 
-#' @export
-categorical.default <- function(x = logical(),
-                                levels = unique_and_not_na(unlist(x)),
-                                alternatives = empty_alternatives(levels),
-                                alternatives_internal = empty_alternatives(levels),
-                                active_alternative = NULL,
-                                active_alternative_is_internal = FALSE,
-                                class = c()) {
 
-  # if x is of length 0, we take a short cut (empty matrix if no levels provided, matrix with no rows and length(levels) columns if levels provided):
-  if(length(x)==0){
-    if(length(levels)==0){
-      logical_fields<-matrix(logical(0), nrow = 0, ncol = 0)
-
-    }else{
-      logical_fields<-purrr::map(levels,function(x){logical(0)}) %>% do.call(cbind,.)
-    }
-
-    return(categorical.matrix(logical_fields,
-                              levels = levels,
-                              alternatives = alternatives,
-                              alternatives_internal = alternatives_internal,
-                              active_alternative = active_alternative,
-                              active_alternative_is_internal = active_alternative_is_internal,
-                              class = class)
-    )
-
-  }
-
-
-  if(length(levels)==0 & length(x)!=0){
-    stop("a categorical vector with no levels can not have any values (not even NA)")
-  }
-
-
-  # by default, we assume we're dealing with a vector or a list of values (for multiple)
-
-  # if vector, make a list so we have only one case to deal with: values should always be a list in the end (unless it's a logical matrix)
-
-
-  assertthat::assert_that(all(unique_and_not_na(unlist(x,use.names = FALSE)) %in% levels))
-
-  if(!is.list(x)){
-    x<-as.list(x)
-  }
-  # all values in the list should be exist in the levels:
-
-  # make a logical matrix:
-  logical_fields<-purrr::map(x,function(x){
-    levels %in% x
-  }) %>% do.call(rbind,.) %>% as.matrix
-
-  logical_fields[purrr::map_lgl(x,function(x){any(is.na(x))}),]<-NA
-  categorical.matrix(logical_fields,
-                     levels = levels,
-                     alternatives = alternatives,
-                     alternatives_internal = alternatives_internal,
-                     active_alternative = active_alternative,
-                     active_alternative_is_internal = active_alternative_is_internal,
-                     class)
-
-}
 
 #' categorical constructors check inputs, convert to matrix and finally should call this function.
 #' @export
@@ -214,6 +192,103 @@ categorical.matrix<-function(x = logical(),
 
 
 
+
+#' create a categorical variable from categorical input
+#' @export
+categorical.cat_categorical <- function(x = logical(),
+                                    levels = NULL,
+                                    alternatives = NULL,
+                                    alternatives_internal = NULL,
+                                    active_alternative = NULL,
+                                    active_alternative_is_internal = FALSE,
+                                    class = c()){
+
+  if(is.null(levels)){
+    levels <- levels(x)
+  }
+
+
+  new<-categorical.matrix(as.matrix(x),
+                       levels=levels,
+                       alternatives = alternatives,
+                       alternatives_internal = alternatives_internal,
+                       active_alternative = active_alternative,
+                       active_alternative_is_internal = active_alternative_is_internal,
+                       class = class)
+
+
+  common <- vec_ptype2.cat_categorical.cat_categorical(x,new)
+  vec_cast(x,common)
+}
+
+#' @export
+categorical.default <- function(x = logical(),
+                                levels = unique_and_not_na(unlist(x)),
+                                alternatives = empty_alternatives(levels),
+                                alternatives_internal = empty_alternatives(levels),
+                                active_alternative = NULL,
+                                active_alternative_is_internal = FALSE,
+                                class = c()) {
+
+  # if x is of length 0, we take a short cut (empty matrix if no levels provided, matrix with no rows and length(levels) columns if levels provided):
+  if(length(x)==0){
+    if(length(levels)==0){
+      logical_fields<-matrix(logical(0), nrow = 0, ncol = 0)
+
+    }else{
+      logical_fields<-do.call(cbind, purrr::map(levels,function(x){logical(0)}))
+    }
+
+    return(categorical.matrix(logical_fields,
+                              levels = levels,
+                              alternatives = alternatives,
+                              alternatives_internal = alternatives_internal,
+                              active_alternative = active_alternative,
+                              active_alternative_is_internal = active_alternative_is_internal,
+                              class = class)
+    )
+
+  }
+
+
+  if(length(levels)==0 & length(x)!=0){
+    stop("a categorical vector with no levels can not have any values (not even NA)")
+  }
+
+
+  # by default, we assume we're dealing with a vector or a list of values (for multiple)
+
+  # if vector, make a list so we have only one case to deal with: values should always be a list in the end (unless it's a logical matrix)
+
+
+  assertthat::assert_that(all(unique_and_not_na(unlist(x,use.names = FALSE)) %in% levels))
+
+  if(!is.list(x)){
+    x<-as.list(x)
+  }
+  # all values in the list should be exist in the levels:
+
+  # make a logical matrix:
+  logical_fields<-purrr::map(x,function(x){
+    levels %in% x
+  }) %>% do.call(rbind,.) %>% as.matrix
+
+  logical_fields[purrr::map_lgl(x,function(x){any(is.na(x))}),]<-NA
+  categorical.matrix(logical_fields,
+                     levels = levels,
+                     alternatives = alternatives,
+                     alternatives_internal = alternatives_internal,
+                     active_alternative = active_alternative,
+                     active_alternative_is_internal = active_alternative_is_internal,
+                     class)
+
+}
+
+
+
+
+
+#' ensures that the provided alternative values have as many rows as there are levels
 enforce_alternative_lengths_match_levels<-function(alternatives,levels){
 
   if(is.null(alternatives)){return(alternatives)}
@@ -242,71 +317,8 @@ enforce_alternative_lengths_match_levels<-function(alternatives,levels){
 
 
 
-#' @method levels cat_categorical
-#' @S3method levels cat_categorical
-levels.cat_categorical<-function(x){
-  attr(x,'levels')
-}
 
-
-#' create a new categorical variable
-#'
-#' @param x a logical matrix indicating which levels are selected per record (each row is a record, each column corresponds to a level specified in 'level's)
-#' @param levels vector of possible values for x; similar to factor levels. Defaults to the unique values in x. Will be converted to characters
-#' @param alternatives_internal a named list of vectors with alternative values corresponding to 'levels'. Must have the same length as levels. Can be accessed with \code{categorical_alternative}. "internal" alternatives are used to store 'fixed' alternatives for classes extending 'cat_categorical'.
-#' @param alternatives a named list of vectors with alternative values corresponding to 'levels'. Must have the same length as levels. Can be accessed with \code{categorical_alternative}. These "external" alternatives are open to user defined alternatives, for example labels in multiple languages.
-new_categorical <- function(x = logical(), levels,
-                            alternatives_internal = empty_alternatives(levels),
-                            alternatives = empty_alternatives(levels),
-                            active_alternative = NULL,
-                            active_alternative_is_internal = FALSE,
-                            class = c()) {
-
-
-
-  if(any(is.na(levels))){
-    stop("levels can not be NA")
-  }
-
-  if(any(duplicated(levels))){
-    stop("levels must be unique")
-  }
-
-  levels <- vctrs::vec_cast(levels,character())
-  if(any(duplicated(levels))){
-    stop("levels must be unique when converted to characters")
-  }
-
-  # consistent NAs:
-  x[apply(x,1,function(x){any(is.na(x))}),]<-NA
-
-
-  logical_fields<-x %>% as.data.frame %>% as.list
-  names(logical_fields)<-levels
-  if(length(logical_fields)==0 & length(levels)==0){
-    logical_fields<-list('0'=logical())
-  }
-
-
-  if(!is.matrix(x)){stop("x must be a matrix")}
-  if(!is.logical(x)){stop("x must be logical")}
-
-
-
-
-  vctrs::new_rcrd(fields = logical_fields,
-                  levels = levels,
-                  alternatives_internal = alternatives_internal,
-                  alternatives = alternatives,
-                  active_alternative = active_alternative,
-                  active_alternative_is_internal = active_alternative_is_internal,
-                  # multiple_selection = multiple_selection,
-                  class = c(class, "cat_categorical"))
-
-}
-
-
-#' create a new categorical variable
+#' convert to categorical variable
 #'
 #' @param x a vector or list to be used as values for the categorical vector
 #' @param levels list of possible values for x; similar to factor levels

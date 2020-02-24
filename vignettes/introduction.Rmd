@@ -134,7 +134,7 @@ alternate(color_temp)
 We can switch as suitable:
 
 ```{r}
-colour_df<-tibble(my_colors)
+colour_df<-tibble::tibble(my_colors)
 colour_df
 
 ```

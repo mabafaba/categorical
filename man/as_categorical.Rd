@@ -2,7 +2,7 @@
 % Please edit documentation in R/cat_categorical.R
 \name{as_categorical}
 \alias{as_categorical}
-\title{create a new categorical variable}
+\title{convert to categorical variable}
 \usage{
 as_categorical(x = logical(), levels = NULL,
   alternatives = empty_alternatives(levels),
@@ -20,5 +20,5 @@ as_categorical(x = logical(), levels = NULL,
 \item{...}{named vectors with alternative values corresponding to 'levels'. Must each have the same length as levels. Can be accessed with \code{categorical_alternative}. These "external" alternatives are open to user defined alternatives, for example labels in multiple languages.}
 }
 \description{
-create a new categorical variable
+convert to categorical variable
 }
