@@ -2,7 +2,7 @@
 % Please edit documentation in R/cat_categorical.R
 \name{alternate}
 \alias{alternate}
-\title{Set categorical vector to alternative vales}
+\title{Set categorical vector to alternative values}
 \usage{
 alternate(x, alternative = c(), internal = FALSE)
 }
@@ -10,10 +10,12 @@ alternate(x, alternative = c(), internal = FALSE)
 \item{x}{categorical vector (see [categorical()])}
 
 \item{alternative}{the alternative value as a string}
+
+\item{internal}{logical: set to TRUE if you want to alternate to an internal alternative (useful for vector classes that are based on the categorical class)}
 }
 \value{
 the original vector, but its active values are replaced by the alternative
 }
 \description{
-Set categorical vector to alternative vales
+Set categorical vector to alternative values
 }

@@ -64,8 +64,8 @@ alternate(mydays_en)
 let's subset the vector to only keep the weekend days:
 
 ```{r}
-
-my_weekend_days_en <- mydays_en[alternate(mydays_en, 'day_type')==categorical('weekend')]
+day_type <- as.character(alternate(mydays_en, 'day_type'))
+my_weekend_days_en <- mydays_en[as.character(day_type)=='weekend']
 my_weekend_days_en
 ```
 

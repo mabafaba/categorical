@@ -26,9 +26,9 @@ unused_colname<-'____LEVELS_CAT_CATEG_IN_vec_ptype2.cat_categorical.cat_categori
 #' #' @export
 
 
-# cat_categorical & cat_categorical:
-
-
+#' cat_categorical & cat_categorical:
+#' @method vec_ptype cat_categorical
+#' @export
 vec_ptype.cat_categorical<-function(x) x[0]
 
 

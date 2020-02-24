@@ -7,3 +7,5 @@ alternatives<-function(x, internal = FALSE){
 
   return(attributes(x)$alternatives_internal)
 }
+
+

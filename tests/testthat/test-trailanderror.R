@@ -1,9 +1,5 @@
 context("test-trailanderror")
-
-library(categorical)
-library(dplyr)
-library(testthat)
-
+#
 test_that('categorical()',{
 
 

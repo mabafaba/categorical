@@ -39,6 +39,10 @@ vec_ptype2.cat_categorical.cat_categorical<-function(x,y,...){
 #' @method vec_cast.cat_categorical cat_categorical
 #' @export
 vec_cast.cat_categorical.cat_categorical <- function(x,to,...) {
+
+  assert_that_not_alternated(x)
+  assert_that_not_alternated(to)
+
   y<-to
   out_levels<-join_levels(x,y)
   out_values<-join_values(x,vec_ptype(y), levels = out_levels)
@@ -47,7 +51,7 @@ vec_cast.cat_categorical.cat_categorical <- function(x,to,...) {
   level_order <- order(out_levels)
 
   if(!all(out_levels == out_levels[level_order])){
-    warning("reordered categorical vector levels!")
+    # warning("reordered categorical vector levels!")
   }
 
   out_levels<-out_levels[level_order]
@@ -113,10 +117,12 @@ join_alternatives<-function(x,y,internal = FALSE){
 
   }
 
-  common_level_type<-vec_ptype(c(levels(x),levels(y)))
+  common_level_type<-vec_ptype2(levels(x),levels(y))
 
   alternatives_x[[unused_colname]]<-vec_cast(levels(x),common_level_type)
   alternatives_y[[unused_colname]]<-vec_cast(levels(y),common_level_type)
+
+  # reorder levels / alternatives to make sure they match where they match
 
   common_alternative_names<-names(alternatives_x)[names(alternatives_x)%in%names(alternatives_y)]
   # don't join alternatives with same name but conflicting values:
@@ -142,7 +148,7 @@ join_alternatives<-function(x,y,internal = FALSE){
   if(length(new_alternative_names)!=0){
     warning(paste0('created new names for alternatives due to conflicting values: ',paste0(new_alternative_names,collapse = ', ')))
   }
-  joined_alternatives <- repair_joint_alternatives(x,y,joined_alternatives)
+    joined_alternatives <- repair_joint_alternatives(x,y,joined_alternatives)
 
 
   # remove temporary column that was used to match on levels:
@@ -178,16 +184,41 @@ repair_joint_alternatives<-function(x,y,joined_alternatives){
 # vec_ptype2.cat_categorical.cat_select_one <- function(x, y, ...) new_categorical()
 
 alternative_conflicts<-function(alt_x,alt_y,levels_x,levels_y){
+  # remove levels that do not appear in both x and y
 
-  x_levels_in_y<-levels_x[levels_x %in% levels_y]
+  # ... from alternatives
+  alt_x<- alt_x[levels_x %in% levels_y,]
+  alt_y<- alt_y[levels_y %in% levels_x,]
+
+  # ... from levels:
+  levels_x <- levels_x[levels_x %in% levels_y] # keep x that are in y
+  levels_y <- levels_y[levels_y %in% levels_x] # keep y that are in x
+
+  # make sure level order is same
+  order_levels_x <- order(levels_x)
+  order_levels_y <-order(levels_y)
+
+  levels_x <- levels_x[order_levels_x]
+  levels_y <- levels_y[order_levels_y]
+
+  if(!all(levels_x==levels_y)){stop("internal bug: x and y should have identical levels at this point")}
+
+  alt_x <-alt_x[order_levels_x,]
+  alt_y <-alt_y[order_levels_y,]
+
+  # remove alternative columns that do not appear in both
   common_alternatives<-names(alt_x)[names(alt_x) %in% names(alt_y)]
 
+  # find the missmatches for each of the common alternatives
   alternative_missmatches<-purrr::map(common_alternatives,function(var){
-    values<-data.frame(x_alt_values = alt_x[match(x_levels_in_y,levels_x), var],
-                       y_alt_values = alt_y[levels_y %in% x_levels_in_y,var],stringsAsFactors = FALSE)
+
+
+    values<-data.frame(x_alt_values = alt_x[, var],
+                       y_alt_values = alt_y[, var],
+                       stringsAsFactors = FALSE)
 
     alternative_values_match <- is_same(values[,1],values[,2])
-    x_levels_in_y[!alternative_values_match]
+    levels_x[!alternative_values_match]
   })
 
 

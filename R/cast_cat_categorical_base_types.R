@@ -1,18 +1,27 @@
+
+# casting vectors in alternated states is a non-trivial problem
+# it requires a LOT of decisions about how casting behaves and it will take a lot of thought to make this work without creating behaviour that is quietly different from what the user will expect.
+# to manage scope for now, categorical vectors must be in unalternated state in order to be casted.
+
+assert_that_not_alternated<-function(x){
+  if(is_alternated(x)){stop("categorical vector must not be alternated. use 'alternate()' without an 'alternative' attribute to un-alternate it.")}
+}
+
 #' @method vec_ptype2.cat_categorical character
 #' @export
 vec_ptype2.cat_categorical.character<-function(x,y,...){
-
-  out_multiple_selection<-has_multiple_response(x)
+  assert_that_not_alternated(x)
   y<-categorical(y)
   vec_ptype2.cat_categorical.cat_categorical(x,y)
 }
 
 
-#' @method vec_ptype2.cat_categorical character
+#' @method vec_ptype2.character cat_categorical
 #' @export
 vec_ptype2.character.cat_categorical<-function(x,y,...){
 
   x<-categorical(x)
+  assert_that_not_alternated(y)
   # passing y first so that new levels from characters are always added in the end;
   # if we don't do that this fails: 'a' ==categorical(c('b','c'))
   # because casting the two sides into each other doesn't return identical types (different order of levels)
@@ -21,7 +30,7 @@ vec_ptype2.character.cat_categorical<-function(x,y,...){
 
 
 
-#' @method vec_cast.cat_categorical cat_categorical
+#' @method vec_cast.character cat_categorical
 #' @export
 vec_cast.character.cat_categorical <- function(x,to,...) {
 
@@ -30,7 +39,7 @@ vec_cast.character.cat_categorical <- function(x,to,...) {
 }
 
 
-#' @method vec_cast.cat_categorical cat_categorical
+#' @method vec_cast.cat_categorical character
 #' @export
 vec_cast.cat_categorical.character <- function(x,to,...) {
   y<-to
@@ -50,22 +59,3 @@ vec_cast.cat_categorical.character <- function(x,to,...) {
   vec_cast.cat_categorical.cat_categorical(x_categorical,y)
 
 }
-
-
-
-#' #' @method vec_cast.cat_categorical cat_categorical
-#' #' @export
-#' vec_cast.character.cat_categorical <- function(x,to,...) {
-#'   y<-to
-#'   out_levels<-join_levels(x,y)
-#'   out_values<-join_values(x,y)
-#'   out_alternatives<-join_alternatives(x,y,FALSE)
-#'   out_alternatives_internal<-join_alternatives(x,y,TRUE)
-#'   out_multiple_selection<-has_multiple_response(x) | has_multiple_response(y)
-#'   new_categorical(x = out_values,
-#'                   levels = out_levels,
-#'                   alternatives_internal = out_alternatives_internal,
-#'                   alternatives = out_alternatives,
-#'                   multiple_selection = out_multiple_selection)
-#'
-#' }

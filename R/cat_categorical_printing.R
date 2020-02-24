@@ -14,7 +14,7 @@ print.cat_categorical<-function(x, ...) {
     return(invisible(x))
     }
 
-  cat(format.cat_categorical(x), sep = " ")
+  cat(format.cat_categorical(x,cat = TRUE), sep = " ")
   cat(paste0('\n',crayon::silver(levels_text)))
   invisible(x)
 }

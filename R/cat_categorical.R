@@ -18,12 +18,14 @@
 #' @param levels list of possible values for x; similar to factor levels
 #' @param alternatives_internal a named list of vectors with alternative values corresponding to 'levels'. Must have the same length as levels. Can be accessed with \code{categorical_alternative}. "internal" alternatives are used to store 'fixed' alternatives for classes extending 'cat_categorical'.
 #' @param ... named vectors with alternative values corresponding to 'levels'. Must each have the same length as levels. Can be accessed with \code{categorical_alternative}. These "external" alternatives are open to user defined alternatives, for example labels in multiple languages.
-#' @importFrom vctrs vec_cast
 #' @importFrom vctrs vec_ptype
 #' @importFrom vctrs vec_ptype2
+#' @importFrom vctrs vec_ptype2.character
+#' @importFrom vctrs vec_cast
+#' @importFrom vctrs vec_cast.character
 #' @export
 categorical <- function(x = logical(),
-                        levels = unique_and_not_na(unlist(x)),
+                        levels = NULL,
                         alternatives = empty_alternatives(levels),
                         alternatives_internal = empty_alternatives(levels),
                         active_alternative = NULL,
@@ -35,20 +37,26 @@ categorical <- function(x = logical(),
 
 #' create a categorical variable from categorical input
 #' @export
-categorical.categorical <- function(x = logical(),
-                                    levels = levels(x),
-                                    alternatives_internal = NULL,
+categorical.cat_categorical <- function(x = logical(),
+                                    levels = NULL,
                                     alternatives = NULL,
+                                    alternatives_internal = NULL,
                                     active_alternative = NULL,
                                     active_alternative_is_internal = FALSE,
                                     class = c()){
 
+  if(is.null(levels)){
+    levels <- levels(x)
+  }
   # TODO: alternatives argument to this function not used (unclear what the expected behaviour should be here)
   #       unclear whether those arguments can safely be removed
-  new<-new_categorical(mr_logical_matrix(x),
-                       levels=levels(x),
-                       alternatives = alternatives(x,F),
-                       alternatives_internal = alternatives(x,T),
+  new<-categorical.matrix(as.matrix(x),
+                       # levels=levels(x),
+                       # alternatives = alternatives(x,F),
+                       # alternatives_internal = alternatives(x,T),
+                       levels=levels,
+                       alternatives = alternatives,
+                       alternatives_internal = alternatives_internal,
                        active_alternative = active_alternative,
                        active_alternative_is_internal = active_alternative_is_internal,
                        class = class)
@@ -69,21 +77,21 @@ categorical.default <- function(x = logical(),
 
   # if x is of length 0, we take a short cut (empty matrix if no levels provided, matrix with no rows and length(levels) columns if levels provided):
   if(length(x)==0){
-      if(length(levels)==0){
-        logical_fields<-matrix(logical(0), nrow = 0, ncol = 0)
+    if(length(levels)==0){
+      logical_fields<-matrix(logical(0), nrow = 0, ncol = 0)
 
-      }else{
-        logical_fields<-purrr::map(levels,function(x){logical(0)}) %>% do.call(cbind,.)
-      }
+    }else{
+      logical_fields<-purrr::map(levels,function(x){logical(0)}) %>% do.call(cbind,.)
+    }
 
-      return(categorical.matrix(logical_fields,
-             levels = levels,
-             alternatives = alternatives,
-             alternatives_internal = alternatives_internal,
-             active_alternative = active_alternative,
-             active_alternative_is_internal = active_alternative_is_internal,
-             class = class)
-      )
+    return(categorical.matrix(logical_fields,
+                              levels = levels,
+                              alternatives = alternatives,
+                              alternatives_internal = alternatives_internal,
+                              active_alternative = active_alternative,
+                              active_alternative_is_internal = active_alternative_is_internal,
+                              class = class)
+    )
 
   }
 
@@ -138,9 +146,9 @@ categorical.matrix<-function(x = logical(),
   }
 
 
-    # matrix to list of logical vectors, named after levels:
-    logical_fields<- x %>% as.data.frame %>% as.list
-    names(logical_fields)<-levels
+  # matrix to list of logical vectors, named after levels:
+  logical_fields<- x %>% as.data.frame %>% as.list
+  names(logical_fields)<-levels
 
 
   public_alternatives<-alternatives
@@ -225,7 +233,7 @@ enforce_alternative_lengths_match_levels<-function(alternatives,levels){
     if(!all(purrr::map_dbl(alternatives,vctrs::vec_size) == length(levels))){stop("all provided alternatives must have exactly one value per categorical level")}
     return(alternatives)
   }
- # for data frames, check nrow equals length levels:
+  # for data frames, check nrow equals length levels:
 
 
 
@@ -320,7 +328,7 @@ format.cat_categorical<-function(x, ..., cat = FALSE) {
   paste0_keepNA<-function(...,collapse = NULL){
     topaste<-list(...)
     longest_length<-max(purrr::map_dbl(topaste,length))
-    topaste_samelength<-lapply(topaste,vec_recycle,longest_length)
+    topaste_samelength<-lapply(topaste,vctrs::vec_recycle,longest_length)
     nas <- lapply(topaste_samelength,is.na)
     any_nas <- nas %>% as.data.frame %>% apply(1,function(x){any((x))}) %>% any
 
@@ -335,24 +343,28 @@ format.cat_categorical<-function(x, ..., cat = FALSE) {
     x<-as.character(unclass(x))
     if(length(x)==0){
       if(!cat){return(invisible(paste0("(0)")))}else{
-        crayon::silver(crayon::italic(paste0(" (",length(x),") ")))
+
+        return(invisible(crayon::silver(crayon::italic(paste0(" (",length(x),") ")))))
       }
 
 
     }
+    multiple_separator<-", "
+
     if(cat){
-      paste0(
+      x <- paste0(
         # number of selected items
-        ifelse(!any(is.na(x)),crayon::silver(crayon::italic(paste0(" (",length(x),") "))),""),
+        ifelse(!any(is.na(x)),
+               crayon::silver(crayon::italic(paste0(" (",length(x),") "))),""),
         # concatenated choices
-        paste0_keepNA("'",x,"'", collapse = crayon::silver(crayon::italic(" & ")))
+        paste0_keepNA("'",x,"'", collapse = crayon::silver(crayon::italic(multiple_separator)))
       )
     }else{
-      paste0(
+      x <- paste0(
         # number of selected items
         ifelse(!any(is.na(x)),paste0(" (",length(x),") "),""),
         # concatenated choices
-        paste0_keepNA("'",x,"'", collapse = (" & "))
+        paste0_keepNA("'",x,"'", collapse = (multiple_separator))
       )
     }
 
@@ -401,9 +413,10 @@ superficial_nas<-function(x){
 }
 
 
-#' Set categorical vector to alternative vales
+#' Set categorical vector to alternative values
 #' @param x categorical vector (see [categorical()])
 #' @param alternative the alternative value as a string
+#' @param internal logical: set to TRUE if you want to alternate to an internal alternative (useful for vector classes that are based on the categorical class)
 #' @return the original vector, but its active values are replaced by the alternative
 #' @export
 alternate <- function(x,alternative = c(), internal = FALSE){
@@ -449,7 +462,26 @@ alternate <- function(x,alternative = c(), internal = FALSE){
   x
 }
 
+#' is a categorical vector alternated?
+#' @param x a vector of type categorical
+#' @return logical, TRUE if the categorical vector is alternated. For details see \code{\link{alternate}}
+#' @export
+is_alternated<-function(x){
+  # if(!is.vector(x)){stop('x must be a vector')}
+  if(!is_categorical(x)){return(FALSE)}
 
+  alt_name<-attributes(x)[['active_alternative']]
+
+  if(is.character(alt_name)){
+    if(length(alt_name == 1)){
+      if(alt_name!=""){
+        return(TRUE)
+      }
+    }
+  }
+  return(FALSE)
+
+}
 
 
 # basic type functions
@@ -476,7 +508,7 @@ is.categorical<-is_categorical
 #' @details operates rowwise (see ?dplyr::rowwise) on a categorical column. Each row's value is a vector with the selected responses.
 #' @return see ?dplyr::mutate
 #' @export
-mutate_categorical<-function(.data,...){
+mutate_categorical<-function(.data, ...){
   mutation <- rlang::enquos(...)
   .data<-.data %>% dplyr::rowwise %>% dplyr::mutate(!!! mutation)
   class(.data)<-class(.data)[class(.data)!="rowwise_df"]
@@ -487,12 +519,6 @@ mutate_categorical<-function(.data,...){
 
 #' @importFrom methods setOldClass
 methods::setOldClass(c("cat_categorical", "vctrs_vctr"))
-
-
-mr_logical_matrix<-function(x){
-  lgl_matrix <- purrr::map(fields(x),field,x=x)   %>% do.call(cbind,.)
-}
-
 
 
 
@@ -521,15 +547,10 @@ categorical_logic<-function(x,...){
 
 
 as.matrix.cat_categorical<-function(x){
-  unique_levels<-levels(x)
-  logical_matrix <-purrr::map(active(x),function(values){
-
-    1:length(unique_levels) %in% match(values, unique_levels)
-
-  }) %>% do.call(rbind,.)
-  colnames(logical_matrix)<-levels(x)
-  logical_matrix
+  do.call(cbind,x)
 }
+
+
 
 
 
@@ -537,7 +558,7 @@ as.matrix.cat_categorical<-function(x){
 
 has_multiple_response<-function(x){
   if(!is_categorical(x)){stop('not a categorical vector')}
-  count_selected <- apply(mr_logical_matrix(x),1,function(x){sum(x)})
+  count_selected <- apply(as.matrix(x),1,function(x){sum(x)})
   any_record_not_na_and_not_selected_exactly_one <- any(count_selected[!is.na(count_selected)])!=1
   return(any_record_not_na_and_not_selected_exactly_one)
 }

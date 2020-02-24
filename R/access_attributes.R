@@ -50,7 +50,7 @@ get_active_alternative_level_values<-function(x){
 
 get_level_values<-function(x){
   values_as_logical_df <- x %>%
-    mr_logical_matrix %>%
+    as.matrix %>%
     t %>%
     as.data.frame
 
@@ -80,7 +80,7 @@ get_active_values<-function(x){
   alternative_values<- alternatives(x,internal = is_internal)
 
   active_values<-x %>%
-    mr_logical_matrix %>%
+    as.matrix %>%
     t %>%
     as.data.frame %>%
     purrr::map(which) %>%
@@ -103,7 +103,7 @@ get_active_values<-function(x){
 restore_lgl_list_NA_in_value_list<-function(value_list, x_categorical){
 
   values_as_logical_df <- x_categorical %>%
-    mr_logical_matrix %>%
+    as.matrix %>%
     t %>%
     as.data.frame
 

@@ -89,18 +89,6 @@ is_interval<-function(x){
 #' @export
 is.interval<-is_interval
 
-#' Mutate interval type variables in a data frame
-#' @param .data a data.frame or tibble
-#' @param ... arguments passed to dplyr::mutate
-#' @details operates rowwise (see ?dplyr::rowwise) on a interval column. Each row's value is a vector with the selected responses.
-#' @return see ?dplyr::mutate
-#' @export
-mutate_categorical<-function(.data,...){
-  mutation <- rlang::enquos(...)
-  .data<-.data %>% dplyr::rowwise %>% dplyr::mutate(!!! mutation)
-  class(.data)<-class(.data)[class(.data)!="rowwise_df"]
-  .data
-}
 
 # following the vctrs vignette, adding this wihtout knowing why or what it does:
 
