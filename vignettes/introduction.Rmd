@@ -23,12 +23,12 @@ library(tibble)
 
 ### features
 
-Categorical Vectors are a basic vector type with the following features:
+This package introduces a new Categorical vector type. With the following features:
 
-- they have a fixed set of allowed values called 'levels' (similar to levels in factors)
-- they can store alternative values for each level; you can switch back and forth between alternatives.
-- each record in the vector can have more than one level 'selected' to allow storing multipe response data.
-- when printing categorical values, they are wrapped in single quotes (between factors that are printed with no quotes and characters that are printed with double quotes) 
+1. A fixed set of values called 'levels' (like in factors)
+2. each record in the vector can have more than one level 'selected' to allow storing multipe response survey data.
+3. Alternative values can be added for each level; you can switch back and forth between alternatives. Alternatives can be of any vector type.
+4. A second set of "internal" alternative values can be set, to make it easy to create new vector types from the categorical type.
 
 ### Example: days of the week
 
@@ -38,9 +38,11 @@ let's store the days of the week as integer values 1-7, but include labels in tw
 
 mydays <- categorical(c(1,2,1,5,6,3,7),
                                 levels=1:7,
-                                labels_english = c('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'),
-                                labels_german = c('Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'),
-                                day_type = c('week','week','week','week','week','weekend','weekend')
+                                alternatives = list(
+                                  labels_english = c('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'),
+                                  labels_german = c('Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'),
+                                  day_type = c('week','week','week','week','week','weekend','weekend')
+                                )
                                 )
 ```
 
@@ -51,7 +53,7 @@ we can `alternate` between the original and alternative values:
 mydays_en <- alternate(mydays, "labels_english")
 mydays_en
 ```
-You can see that the levels remain untouched.
+You can see that the "active" value changed (while the levels remain untouched)
 we can `alternate` back to the original levels if we don't name the alternative:
 
 ```{r}
@@ -59,18 +61,14 @@ alternate(mydays_en)
 
 ```
 
-let's subset the vector to only keep the week days, and show their german labels:
+let's subset the vector to only keep the week days, and show their English labels:
 
 ```{r}
 
-my_week_days <- alternate(mydays_en,'day_type')
-my_week_days
+day_type <- as.character(alternate(mydays_en, 'day_type'))
+my_weekend_days_en <- mydays_en[day_type=='weekend']
+my_weekend_days_en
 
-my_week_days <- my_week_days[my_week_days!='weekend']
-my_week_days
-
-my_week_days <- alternate(my_week_days, 'labels_german')
-my_week_days
 ```
 
 
@@ -86,7 +84,10 @@ library(dplyr)
 
 my_colors <- categorical(x = c("red","blue" , "red","red", "blue"), 
                          levels =  c("red", "green", "blue"),
-                         hexcode = c("#FF0000","#00FF00","#0000FF"))
+                         alternatives = list(
+                           hexcode = c("#FF0000","#00FF00","#0000FF")
+                         )
+)
 
 my_colors                
 
@@ -118,8 +119,11 @@ Note that multiple 'original' values can have the same alternative; one 'origina
 
 my_colors <- categorical(x = c("red","blue" , "red","red", "blue"), 
                          levels =  c("red", "green", "blue"),
-                         hexcode = c("#FF0000","#00FF00","#0000FF"),
-                         temperature = c('warm', 'cool', 'cool'))
+                         alternatives = list(
+                           hexcode = c("#FF0000","#00FF00","#0000FF"),
+                           temperature = c('warm', 'cool', 'cool')
+                         )
+)
 
 
 color_temp <- alternate(my_colors, 'temperature')
@@ -132,7 +136,7 @@ alternate(color_temp)
 We can switch as suitable:
 
 ```{r}
-colour_df<-tibble(my_colors)
+colour_df<-tibble::tibble(my_colors)
 colour_df
 
 ```
@@ -171,7 +175,8 @@ levels(many_favourite_colours)
 ```{r}
 # colors ordered by wavelength
 my_lightwaves<-ordinal(x = c('red','infra','violet','blue','red', 'infra'),
-                levels = c('violet','blue','red', 'infra'),rank = c(1,2,3,4))
+                levels = c('violet','blue','red', 'infra'),
+                alternatives = list(rank = c(1,2,3,4)))
 
 my_lightwaves
 
@@ -185,7 +190,8 @@ my_lightwaves<-ordinal(x = list(c('red','infra'),
                                 'violet',
                                 c('blue','red'),
                                 'infra'),
-                levels = c('violet','blue','red', 'infra'),rank = c(1,2,3,4))
+                levels = c('violet','blue','red', 'infra'),
+                alternatives = list(rank = c(1,2,3,4)))
 
 
 
