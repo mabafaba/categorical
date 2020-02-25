@@ -23,12 +23,12 @@ library(tibble)
 
 ### features
 
-Categorical Vectors are a basic vector type with the following features:
+This package introduces a new Categorical vector type. With the following features:
 
-- they have a fixed set of allowed values called 'levels' (like factors)
-- they can store alternative values for each level; you can switch back and forth between alternatives. Alternatives can be of any vector type
-- each record in the vector can have more than one level 'selected' to allow storing multipe response data.
-- when printing categorical values, they are wrapped in single quotes (between factors that are printed with no quotes and characters that are printed with double quotes) 
+1. A fixed set of values called 'levels' (like in factors)
+2. each record in the vector can have more than one level 'selected' to allow storing multipe response survey data.
+3. Alternative values can be added for each level; you can switch back and forth between alternatives. Alternatives can be of any vector type.
+4. A second set of "internal" alternative values can be set, to make it easy to create new vector types from the categorical type.
 
 ### Example: days of the week
 
@@ -65,7 +65,7 @@ let's subset the vector to only keep the weekend days:
 
 ```{r}
 day_type <- as.character(alternate(mydays_en, 'day_type'))
-my_weekend_days_en <- mydays_en[as.character(day_type)=='weekend']
+my_weekend_days_en <- mydays_en[day_type=='weekend']
 my_weekend_days_en
 ```
 

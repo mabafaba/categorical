@@ -69,6 +69,6 @@ vec_cast.cat_categorical.character <- function(x,to,...) {
 # to manage scope for now, categorical vectors must be in unalternated state in order to be casted.
 
 assert_that_not_alternated<-function(x){
-  if(is_alternated(x)){stop("categorical vector must not be alternated. use 'alternate()' without an 'alternative' attribute to un-alternate it.")}
+  if(is_alternated(x)){stop("can't do this on alternated categorical vectors use. unalternate or convert to other type first!")}
 }
 
