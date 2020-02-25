@@ -1,4 +1,7 @@
 #' ensures that the provided alternative values have as many rows as there are levels
+#'
+#' @param alternatives a tibble from attributes(some_categorical_vector)$alternatives
+#' @param levels character vector with the corresponding levels
 enforce_alternative_lengths_match_levels<-function(alternatives,levels){
 
   if(is.null(alternatives)){return(alternatives)}

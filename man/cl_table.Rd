@@ -7,7 +7,7 @@
 cl_table(x)
 }
 \arguments{
-\item{a}{categorical vector}
+\item{x}{categorical vector}
 }
 \description{
 table() for categorical vectors

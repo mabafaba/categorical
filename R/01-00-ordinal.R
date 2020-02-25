@@ -16,7 +16,7 @@ new_ordinal<-function(x, levels, ranks, ...){
 #'
 #' @param x a vector of to be used as values for the ordinal vector. These should be characters for most use cases (but can be other types)
 #' @param levels vector of of possible values for x; similar to factor levels
-#' @param rank a vector of numeric ranks corresponding to each level.
+#' @param ranks a vector of numeric ranks corresponding to each level.
 #' @param ... named vectors with alternative values corresponding to 'levels'. Must each have the same length as levels. Can be accessed with \code{alternate}. These "external" alternatives are open to user defined alternatives, for example labels in multiple languages.
 #' @export
 ordinal <- function(x, levels = unique(unlist(x)), ranks = 1:length(levels), ...) {

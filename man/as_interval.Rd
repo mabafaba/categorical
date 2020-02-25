@@ -12,6 +12,8 @@ as_interval(x, levels = unique(unlist(x)), ranks = 1:length(levels),
 
 \item{levels}{vector of of possible values for x; similar to factor levels}
 
+\item{ranks}{a vector of numeric ranks corresponding to each level.}
+
 \item{...}{named vectors with alternative values corresponding to 'levels'. Must each have the same length as levels. Can be accessed with \code{alternate}. These "external" alternatives are open to user defined alternatives, for example labels in multiple languages.}
 }
 \description{

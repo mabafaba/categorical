@@ -6,6 +6,11 @@
 \usage{
 enforce_alternative_lengths_match_levels(alternatives, levels)
 }
+\arguments{
+\item{alternatives}{a tibble from attributes(some_categorical_vector)$alternatives}
+
+\item{levels}{character vector with the corresponding levels}
+}
 \description{
 ensures that the provided alternative values have as many rows as there are levels
 }

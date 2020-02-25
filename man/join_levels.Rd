@@ -6,6 +6,11 @@
 \usage{
 join_levels(x, y)
 }
+\arguments{
+\item{x}{first categorical vector}
+
+\item{y}{second categorical vector}
+}
 \description{
 combine the levels attribute of two categorical vectors
 }

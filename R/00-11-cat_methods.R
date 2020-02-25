@@ -6,7 +6,7 @@ levels.cat_categorical<-function(x){
 
 #' table() for categorical vectors
 #'
-#' @param a categorical vector
+#' @param x categorical vector
 #'
 #' @export
 cl_table<-function(x){

@@ -3,7 +3,8 @@
 
 
 #' combine the levels attribute of two categorical vectors
-#'
+#' @param x first categorical vector
+#' @param y second categorical vector
 join_levels<-function(x,y){
   # if(typeof(levels(x))!=typeof(levels(y))){warning('converting levels to match data type')}
   if(!is_categorical(x)){stop("x must be a categorical vector")}
