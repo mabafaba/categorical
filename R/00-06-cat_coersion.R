@@ -1,7 +1,7 @@
 unused_colname<-'____LEVELS_CAT_CATEG_IN_vec_ptype2.cat_categorical.cat_categorical_JOIN_324895683247659__'
 
 #' When the change happens implicitly (e.g in c()) we call it coercion
-#' ec_ptype2(x, y) defines possible set of coercions.
+#' vec_ptype2(x, y) defines possible set of coercions.
 #' It returns a prototype if x and y can be safely coerced to the same prototype;
 #' otherwise it returns an error.
 #' The set of automatic coercions is usually quite small
@@ -9,7 +9,7 @@ unused_colname<-'____LEVELS_CAT_CATEG_IN_vec_ptype2.cat_categorical.cat_categori
 #' and silently propagate mistakes.
 #'
 #'
-#' each combo of our class and other classes that can be coerced toghether has
+#' each combo of our class and other classes that can be coerced together has
 #' a function that returns just a prototype of the resulting class
 #'
 #' namespace exports:
@@ -26,7 +26,7 @@ unused_colname<-'____LEVELS_CAT_CATEG_IN_vec_ptype2.cat_categorical.cat_categori
 #' #' @export
 
 
-#' cat_categorical & cat_categorical:
+#' cat_categorical
 #' @method vec_ptype cat_categorical
 #' @export
 vec_ptype.cat_categorical<-function(x) x[0]

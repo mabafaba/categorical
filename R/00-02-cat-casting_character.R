@@ -1,12 +1,10 @@
 
-# casting vectors in alternated states is a non-trivial problem
-# it requires a LOT of decisions about how casting behaves and it will take a lot of thought to make this work without creating behaviour that is quietly different from what the user will expect.
-# to manage scope for now, categorical vectors must be in unalternated state in order to be casted.
+#' the functions in this file determine how categorical vectors are converted to other vector types
+#' this follows the vctrs package casting system (see ?browseVignettes("vctrs") for details)
 
-assert_that_not_alternated<-function(x){
-  if(is_alternated(x)){stop("categorical vector must not be alternated. use 'alternate()' without an 'alternative' attribute to un-alternate it.")}
-}
 
+#' common type: cat_categorical & character
+#'
 #' @method vec_ptype2.cat_categorical character
 #' @export
 vec_ptype2.cat_categorical.character<-function(x,y,...){
@@ -15,7 +13,8 @@ vec_ptype2.cat_categorical.character<-function(x,y,...){
   vec_ptype2.cat_categorical.cat_categorical(x,y)
 }
 
-
+#' common type: character & cat_categorical
+#'
 #' @method vec_ptype2.character cat_categorical
 #' @export
 vec_ptype2.character.cat_categorical<-function(x,y,...){
@@ -29,7 +28,8 @@ vec_ptype2.character.cat_categorical<-function(x,y,...){
 }
 
 
-
+#' cast cat_categorical to character
+#'
 #' @method vec_cast.character cat_categorical
 #' @export
 vec_cast.character.cat_categorical <- function(x,to,...) {
@@ -38,7 +38,8 @@ vec_cast.character.cat_categorical <- function(x,to,...) {
 
 }
 
-
+#' cast character to cat_categorical
+#'
 #' @method vec_cast.cat_categorical character
 #' @export
 vec_cast.cat_categorical.character <- function(x,to,...) {
@@ -59,3 +60,15 @@ vec_cast.cat_categorical.character <- function(x,to,...) {
   vec_cast.cat_categorical.cat_categorical(x_categorical,y)
 
 }
+
+
+# NOTE on casting categorical vectors when they are set to alternative values:
+# casting vectors in alternated states is a non-trivial problem
+# it requires a LOT of decisions about how casting behaves and it will take a lot of thought to make this work
+# without creating behaviour that is quietly different from what the user will expect.
+# to manage scope for now, categorical vectors must be in unalternated state in order to be casted.
+
+assert_that_not_alternated<-function(x){
+  if(is_alternated(x)){stop("categorical vector must not be alternated. use 'alternate()' without an 'alternative' attribute to un-alternate it.")}
+}
+

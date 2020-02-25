@@ -9,7 +9,6 @@
 #'        - for an "interval" subclass: lower and upper limit
 #'        - for an "ordinal" subclass: integer rank
 
-
 #' it follows the generic methods to create categorical() vectors from different data types.
 #' for most types, we
 #' - check if the inputs are valid
@@ -19,9 +18,6 @@
 #'   - converts inputs to what they should be like for the final attributes
 #'   - call new_categorical()
 #'     - which creates the final vector with vctrs::new_rcrd()
-#' -
-
-
 
 #' create a new categorical variable
 #'
@@ -196,12 +192,12 @@ categorical.matrix<-function(x = logical(),
 #' create a categorical variable from categorical input
 #' @export
 categorical.cat_categorical <- function(x = logical(),
-                                    levels = NULL,
-                                    alternatives = NULL,
-                                    alternatives_internal = NULL,
-                                    active_alternative = NULL,
-                                    active_alternative_is_internal = FALSE,
-                                    class = c()){
+                                        levels = NULL,
+                                        alternatives = NULL,
+                                        alternatives_internal = NULL,
+                                        active_alternative = NULL,
+                                        active_alternative_is_internal = FALSE,
+                                        class = c()){
 
   if(is.null(levels)){
     levels <- levels(x)
@@ -209,12 +205,12 @@ categorical.cat_categorical <- function(x = logical(),
 
 
   new<-categorical.matrix(as.matrix(x),
-                       levels=levels,
-                       alternatives = alternatives,
-                       alternatives_internal = alternatives_internal,
-                       active_alternative = active_alternative,
-                       active_alternative_is_internal = active_alternative_is_internal,
-                       class = class)
+                          levels=levels,
+                          alternatives = alternatives,
+                          alternatives_internal = alternatives_internal,
+                          active_alternative = active_alternative,
+                          active_alternative_is_internal = active_alternative_is_internal,
+                          class = class)
 
 
   common <- vec_ptype2.cat_categorical.cat_categorical(x,new)
@@ -284,40 +280,6 @@ categorical.default <- function(x = logical(),
 
 }
 
-
-
-
-
-#' ensures that the provided alternative values have as many rows as there are levels
-enforce_alternative_lengths_match_levels<-function(alternatives,levels){
-
-  if(is.null(alternatives)){return(alternatives)}
-
-  if(is.data.frame(alternatives)){
-    if(!nrow(alternatives)==length(levels)){
-      stop("all provided alternatives must have exactly one value per categorical level")
-    }
-    return(alternatives)
-  }
-
-  if(is.list(alternatives)){
-    # remove empty elements
-    alternatives[sapply(alternatives, is.null)] <- NULL
-    if(length(alternatives)==0){NULL}
-    # stop if not all remaining have the same length as levels
-    if(!all(purrr::map_dbl(alternatives,vctrs::vec_size) == length(levels))){stop("all provided alternatives must have exactly one value per categorical level")}
-    return(alternatives)
-  }
-  # for data frames, check nrow equals length levels:
-
-
-
-  stop("alternatives must be a list or a data.frame")
-}
-
-
-
-
 #' convert to categorical variable
 #'
 #' @param x a vector or list to be used as values for the categorical vector
@@ -327,89 +289,6 @@ enforce_alternative_lengths_match_levels<-function(alternatives,levels){
 #' @export
 as_categorical<-categorical
 
-
-
-
-#' @method format cat_categorical
-#' @S3method format cat_categorical
-#' @export
-format.cat_categorical<-function(x, ..., cat = FALSE) {
-  x<-get_active_values(x)
-  single_selection<-all(purrr::map_int(x,length)==1)
-
-  paste0_keepNA<-function(...,collapse = NULL){
-    topaste<-list(...)
-    longest_length<-max(purrr::map_dbl(topaste,length))
-    topaste_samelength<-lapply(topaste,vctrs::vec_recycle,longest_length)
-    nas <- lapply(topaste_samelength,is.na)
-    any_nas <- nas %>% as.data.frame %>% apply(1,function(x){any((x))}) %>% any
-
-    pasted<-paste0(...,collapse = collapse)
-    pasted[any_nas]<-NA
-    pasted
-
-  }
-
-  if(single_selection){return(invisible(paste0_keepNA("'",as.character(unlist(x)),"'")))}
-  x<-purrr::map_chr(x,function(x){
-    x<-as.character(unclass(x))
-    if(length(x)==0){
-      if(!cat){return(invisible(paste0("(0)")))}else{
-
-        return(invisible(crayon::silver(crayon::italic(paste0(" (",length(x),") ")))))
-      }
-
-
-    }
-    multiple_separator<-", "
-
-    if(cat){
-      x <- paste0(
-        # number of selected items
-        ifelse(!any(is.na(x)),
-               crayon::silver(crayon::italic(paste0(" (",length(x),") "))),""),
-        # concatenated choices
-        paste0_keepNA("'",x,"'", collapse = crayon::silver(crayon::italic(multiple_separator)))
-      )
-    }else{
-      x <- paste0(
-        # number of selected items
-        ifelse(!any(is.na(x)),paste0(" (",length(x),") "),""),
-        # concatenated choices
-        paste0_keepNA("'",x,"'", collapse = (multiple_separator))
-      )
-    }
-
-  })
-
-
-  invisible(x)
-}
-
-
-#' List all alternative valuse for a categorical vector
-#' @param x a categorical vector
-#' @param internal logical: If TRUE, show internal alternatives only
-#' @return a list with internal and public alternatives as character vectors, or only one of them as a vector if `internal` is set
-#' @export
-list_alternatives<-function(x,internal = NULL){
-  if(is.null(internal)){
-    return(list(internal = names(attr(x,'alternatives_internal')), public = names(attr(x,'alternatives'))))
-
-  }
-  if(internal){
-    return(names(attr(x,'alternatives_internal')))
-  }
-  return(names(attr(x,'alternatives')))
-}
-
-set_active_alternative<-function(x,alternative = character(), internal = FALSE){
-
-  attributes(x)[['active_alternative']]<-alternative
-  attributes(x)[['active_alternative_is_internal']]<-internal
-  x
-
-}
 
 #' find superficial NAs
 #' @param x a <categorical> vectors
@@ -424,76 +303,6 @@ superficial_nas<-function(x){
   return(superficial_nas)
 }
 
-
-#' Set categorical vector to alternative values
-#' @param x categorical vector (see [categorical()])
-#' @param alternative the alternative value as a string
-#' @param internal logical: set to TRUE if you want to alternate to an internal alternative (useful for vector classes that are based on the categorical class)
-#' @return the original vector, but its active values are replaced by the alternative
-#' @export
-alternate <- function(x,alternative = c(), internal = FALSE){
-
-  # get available alternatives:
-
-  if(length(alternative)==0){
-    return(set_active_alternative(x))
-  }
-  if(internal){
-    alt_attribute<- "alternatives_internal"
-  }else{
-    alt_attribute<- "alternatives"
-  }
-  alternatives_df<-attr(x,alt_attribute)
-
-  # check requested alternative exists:
-  if(!(ncol(alternatives_df)>0)){stop('no alternative attributes available; maybe if you change the `internal` argument?')}
-  if(length(alternative)==0){alternative_valid<-TRUE
-  }else{
-    alternative_valid <- (alternative %in% colnames(alternatives_df)) | (is.numeric(alternative) & alternative <= ncol(alternatives_df))
-  }
-  if(!alternative_valid){
-    stop(paste('can\'t select alternative', alternative, 'from available alternatives:', paste0(names(alternatives_df),collapse = " "),'. Maybe you need to change the `internal` argument?'))
-  }
-
-  x<-set_active_alternative(x,
-                            alternative = alternative,
-                            internal = internal)
-
-  superficial_nas<-superficial_nas(x)
-  if(any(superficial_nas)){
-    NA_level_names<-unique(names(superficial_nas[superficial_nas==TRUE]))
-    warning(paste0(
-      "superficial NAs produced (see ?superficial_nas). selected alternative has no values defined for these levels:",
-      "'",paste0(NA_level_names,collapse = '\', \''),"'"
-    )
-    )
-
-
-  }
-
-  x
-}
-
-#' is a categorical vector alternated?
-#' @param x a vector of type categorical
-#' @return logical, TRUE if the categorical vector is alternated. For details see \code{\link{alternate}}
-#' @export
-is_alternated<-function(x){
-  # if(!is.vector(x)){stop('x must be a vector')}
-  if(!is_categorical(x)){return(FALSE)}
-
-  alt_name<-attributes(x)[['active_alternative']]
-
-  if(is.character(alt_name)){
-    if(length(alt_name == 1)){
-      if(alt_name!=""){
-        return(TRUE)
-      }
-    }
-  }
-  return(FALSE)
-
-}
 
 
 # basic type functions

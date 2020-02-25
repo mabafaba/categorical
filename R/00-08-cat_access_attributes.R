@@ -1,4 +1,7 @@
 
+
+
+
 alternatives<-function(x, internal = FALSE){
   if(!is_categorical(x)){stop("not a <categorical> vector")}
   if(!internal){
@@ -7,8 +10,6 @@ alternatives<-function(x, internal = FALSE){
 
   return(attributes(x)$alternatives_internal)
 }
-
-
 
 
 # levels and alternatives -------------------------------------------------
@@ -108,6 +109,7 @@ get_active_values<-function(x){
 
 
 #' set a list of items to NA where any value in a categorical logical matrix representation is NA
+#'
 #' @param value_list a list with as many items as there are records in x_categorical
 #' @param x_categorical a categorical vector
 restore_lgl_list_NA_in_value_list<-function(value_list, x_categorical){

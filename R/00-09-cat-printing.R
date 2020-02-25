@@ -1,3 +1,61 @@
+#' @method format cat_categorical
+#' @S3method format cat_categorical
+#' @export
+format.cat_categorical<-function(x, ..., cat = FALSE) {
+  x<-get_active_values(x)
+  single_selection<-all(purrr::map_int(x,length)==1)
+
+  paste0_keepNA<-function(...,collapse = NULL){
+    topaste<-list(...)
+    longest_length<-max(purrr::map_dbl(topaste,length))
+    topaste_samelength<-lapply(topaste,vctrs::vec_recycle,longest_length)
+    nas <- lapply(topaste_samelength,is.na)
+    any_nas <- nas %>% as.data.frame %>% apply(1,function(x){any((x))}) %>% any
+
+    pasted<-paste0(...,collapse = collapse)
+    pasted[any_nas]<-NA
+    pasted
+
+  }
+
+  if(single_selection){return(invisible(paste0_keepNA("'",as.character(unlist(x)),"'")))}
+  x<-purrr::map_chr(x,function(x){
+    x<-as.character(unclass(x))
+    if(length(x)==0){
+      if(!cat){return(invisible(paste0("(0)")))}else{
+
+        return(invisible(crayon::silver(crayon::italic(paste0(" (",length(x),") ")))))
+      }
+
+
+    }
+    multiple_separator<-", "
+
+    if(cat){
+      x <- paste0(
+        # number of selected items
+        ifelse(!any(is.na(x)),
+               crayon::silver(crayon::italic(paste0(" (",length(x),") "))),""),
+        # concatenated choices
+        paste0_keepNA("'",x,"'", collapse = crayon::silver(crayon::italic(multiple_separator)))
+      )
+    }else{
+      x <- paste0(
+        # number of selected items
+        ifelse(!any(is.na(x)),paste0(" (",length(x),") "),""),
+        # concatenated choices
+        paste0_keepNA("'",x,"'", collapse = (multiple_separator))
+      )
+    }
+
+  })
+
+
+  invisible(x)
+}
+
+
+
 
 #' @method print cat_categorical
 #' @S3method print cat_categorical
@@ -14,7 +72,7 @@ print.cat_categorical<-function(x, ...) {
     return(invisible(x))
     }
 
-  cat(format.cat_categorical(x,cat = TRUE), sep = " ")
+  cat(format.cat_categorical(x,cat = FALSE), sep = " ") # using cat = FALSE to turn off colors to speed up printing
   cat(paste0('\n',crayon::silver(levels_text)))
   invisible(x)
 }
