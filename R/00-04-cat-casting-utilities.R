@@ -26,8 +26,8 @@ join_levels<-function(x,y){
 
 
 #' combine values of two categorical vectors
-#'
-join_values<-function(x,y,levels){
+#' @param x,y categorical vectors
+join_values<-function(x,y){
   c(get_level_values(x),get_level_values(y))
 }
 

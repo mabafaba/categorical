@@ -12,6 +12,9 @@ and silently propagate mistakes.}
 \usage{
 \method{vec_ptype}{cat_categorical}(x)
 }
+\arguments{
+\item{x}{categorical vector}
+}
 \description{
 each combo of our class and other classes that can be coerced together has
 a function that returns just a prototype of the resulting class

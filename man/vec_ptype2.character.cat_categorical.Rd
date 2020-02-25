@@ -6,6 +6,13 @@
 \usage{
 \method{vec_ptype2.character}{cat_categorical}(x, y, ...)
 }
+\arguments{
+\item{x}{vector object}
+
+\item{y}{vector object}
+
+\item{...}{additional arguments}
+}
 \description{
 common type: character & cat_categorical
 }

@@ -6,6 +6,11 @@
 \usage{
 \method{droplevels}{cat_categorical}(x, ...)
 }
+\arguments{
+\item{x}{categorical vector}
+
+\item{...}{additional parameters}
+}
 \description{
 drop levels from categorical vector
 }

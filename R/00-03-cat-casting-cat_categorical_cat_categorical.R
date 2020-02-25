@@ -1,6 +1,7 @@
 
 #' common type of cat_categorical and cat_categorical
 #'
+#' @inheritParams vec_ptype2.cat_categorical
 #' @method vec_ptype2.cat_categorical cat_categorical
 #' @export
 vec_ptype2.cat_categorical.cat_categorical<-function(x,y,...){
@@ -35,7 +36,7 @@ vec_ptype2.cat_categorical.cat_categorical<-function(x,y,...){
 }
 
 #' cast cat_categorical to cat_categorical
-#'
+#' @inheritParams vec_cast.cat_categorical
 #' @method vec_cast.cat_categorical cat_categorical
 #' @export
 vec_cast.cat_categorical.cat_categorical <- function(x,to,...) {
@@ -45,7 +46,7 @@ vec_cast.cat_categorical.cat_categorical <- function(x,to,...) {
 
   y<-to
   out_levels<-join_levels(x,y)
-  out_values<-join_values(x,vec_ptype(y), levels = out_levels)
+  out_values<-join_values(x,vec_ptype(y))
   out_alternatives<-join_alternatives(x,y,FALSE)
   out_alternatives_internal<-join_alternatives(x,y,TRUE)
   level_order <- order(out_levels)

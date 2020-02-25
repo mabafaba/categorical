@@ -46,11 +46,8 @@ categorical <- function(x = logical(),
 
 
 #' create a new categorical variable
-#'
+#' @inheritParams categorical
 #' @param x a logical matrix indicating which levels are selected per record (each row is a record, each column corresponds to a level specified in 'level's)
-#' @param levels vector of possible values for x; similar to factor levels. Defaults to the unique values in x. Will be converted to characters
-#' @param alternatives_internal a named list of vectors with alternative values corresponding to 'levels'. Must have the same length as levels. Can be accessed with \code{categorical_alternative}. "internal" alternatives are used to store 'fixed' alternatives for classes extending 'cat_categorical'.
-#' @param alternatives a named list of vectors with alternative values corresponding to 'levels'. Must have the same length as levels. Can be accessed with \code{categorical_alternative}. These "external" alternatives are open to user defined alternatives, for example labels in multiple languages.
 new_categorical <- function(x = logical(), levels,
                             alternatives_internal = empty_alternatives(levels),
                             alternatives = empty_alternatives(levels),

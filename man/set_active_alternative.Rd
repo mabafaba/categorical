@@ -6,6 +6,13 @@
 \usage{
 set_active_alternative(x, alternative = character(), internal = FALSE)
 }
+\arguments{
+\item{x}{categorical vector}
+
+\item{alternative}{the name of the alternative to be set as the active one}
+
+\item{internal}{logical, TRUE if the active alternative is internal}
+}
 \description{
 set a new alternative as active
 }

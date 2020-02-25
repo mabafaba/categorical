@@ -2,7 +2,7 @@
 % Please edit documentation in R/02-00-range.R
 \name{interval}
 \alias{interval}
-\title{create a new interval variable}
+\title{create a new interval variable  (EXPERIMENTAL)}
 \usage{
 interval(x, levels = unique(unlist(x)), ranks = 1:length(levels), ...)
 }
@@ -16,5 +16,5 @@ interval(x, levels = unique(unlist(x)), ranks = 1:length(levels), ...)
 \item{...}{named vectors with alternative values corresponding to 'levels'. Must each have the same length as levels. Can be accessed with \code{alternate}. These "external" alternatives are open to user defined alternatives, for example labels in multiple languages.}
 }
 \description{
-create a new interval variable
+create a new interval variable  (EXPERIMENTAL)
 }

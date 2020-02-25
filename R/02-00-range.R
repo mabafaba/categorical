@@ -1,9 +1,11 @@
 
-#' create a new interval variable
-#'
-#' @param x a vector of to be used as values for the interval vector. These should be characters for most use cases (but can be other types)
-#' @param ranks a vector of numeric ranks corresponding to each level.
-#' @param ... named vectors with alternative values corresponding to 'levels'. Must each have the same length as levels. Can be accessed with \code{alternate}. These "external" alternatives are open to user defined alternatives, for example labels in multiple languages.
+#' create a new interval variable (EXPERIMENTAL)
+#' @inheritParams interval
+#' @param lower numeric vector of lower limits
+#' @param upper numeric vector of upper limits
+#' @param closed logical vector of length 2: are lower or upper ends open?
+#' @param levels_lower ?
+#' @param levels_upper ?
 new_interval<-function(lower, upper, closed = c(TRUE,FALSE),levels,levels_lower,levels_upper, ...){
 
 
@@ -42,7 +44,7 @@ new_interval<-function(lower, upper, closed = c(TRUE,FALSE),levels,levels_lower,
 
 
 
-#' create a new interval variable
+#' create a new interval variable  (EXPERIMENTAL)
 #'
 #' @param x a vector of to be used as values for the interval vector. These should be characters for most use cases (but can be other types)
 #' @param levels vector of of possible values for x; similar to factor levels

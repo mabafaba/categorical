@@ -6,6 +6,13 @@
 \usage{
 \method{vec_cast.character}{cat_categorical}(x, to, ...)
 }
+\arguments{
+\item{x}{vector}
+
+\item{to}{prototype to conver to}
+
+\item{...}{additional arguments}
+}
 \description{
 cast cat_categorical to character
 }

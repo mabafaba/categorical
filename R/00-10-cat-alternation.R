@@ -75,7 +75,9 @@ list_alternatives<-function(x,internal = NULL){
 
 
 #' set a new alternative as active
-#'
+#' @param x categorical vector
+#' @param alternative the name of the alternative to be set as the active one
+#' @param internal logical, TRUE if the active alternative is internal
 set_active_alternative<-function(x,alternative = character(), internal = FALSE){
 
   attributes(x)[['active_alternative']]<-alternative

@@ -12,11 +12,17 @@ new_categorical(x = logical(), levels,
 \arguments{
 \item{x}{a logical matrix indicating which levels are selected per record (each row is a record, each column corresponds to a level specified in 'level's)}
 
-\item{levels}{vector of possible values for x; similar to factor levels. Defaults to the unique values in x. Will be converted to characters}
+\item{levels}{list of possible values for x; similar to factor levels}
 
-\item{alternatives_internal}{a named list of vectors with alternative values corresponding to 'levels'. Must have the same length as levels. Can be accessed with \code{categorical_alternative}. "internal" alternatives are used to store 'fixed' alternatives for classes extending 'cat_categorical'.}
+\item{alternatives_internal}{a named list of vectors with alternative values corresponding to 'levels'. Must have the same length as levels. Can be accessed with \code{alternate}. "internal" alternatives are used to store 'fixed' alternatives for classes extending 'cat_categorical'.}
 
-\item{alternatives}{a named list of vectors with alternative values corresponding to 'levels'. Must have the same length as levels. Can be accessed with \code{categorical_alternative}. These "external" alternatives are open to user defined alternatives, for example labels in multiple languages.}
+\item{alternatives}{a named list of vectors with alternative values corresponding to 'levels'. Must have the same length as levels. Can be accessed with \code{\link{alternate}}.}
+
+\item{active_alternative}{alternative to be used for display}
+
+\item{active_alternative_is_internal}{whether the active alternative is internal}
+
+\item{class}{optional: name the subclass if you are using this to define a new vector type on top of the 'cat_categorical' class}
 }
 \description{
 create a new categorical variable

@@ -15,9 +15,12 @@ cl_table<-function(x){
 
 
 #' drop levels from categorical vector
+#' @param x categorical vector
+#' @param ... additional parameters
 #' @export
 droplevels.cat_categorical<-function(x, ...){
-
+# TODO: add code (:
+stop('droplevels not supported yet')
 }
 
 

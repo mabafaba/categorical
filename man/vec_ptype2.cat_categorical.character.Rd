@@ -8,6 +8,13 @@ common type: cat_categorical & character}
 \usage{
 \method{vec_ptype2.cat_categorical}{character}(x, y, ...)
 }
+\arguments{
+\item{x}{vector object}
+
+\item{y}{vector object}
+
+\item{...}{additional arguments}
+}
 \description{
 the functions in this file determine how categorical vectors are converted to other vector types
 this follows the vctrs package casting system (see ?browseVignettes("vctrs") for details)

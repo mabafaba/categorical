@@ -5,6 +5,7 @@
 
 #' common type: cat_categorical & character
 #'
+#' @inheritParams vec_ptype2.cat_categorical
 #' @method vec_ptype2.cat_categorical character
 #' @export
 vec_ptype2.cat_categorical.character<-function(x,y,...){
@@ -15,6 +16,7 @@ vec_ptype2.cat_categorical.character<-function(x,y,...){
 
 #' common type: character & cat_categorical
 #'
+#' @inheritParams vec_ptype2.cat_categorical
 #' @method vec_ptype2.character cat_categorical
 #' @export
 vec_ptype2.character.cat_categorical<-function(x,y,...){
@@ -30,6 +32,7 @@ vec_ptype2.character.cat_categorical<-function(x,y,...){
 
 #' cast cat_categorical to character
 #'
+#' @inheritParams vec_cast.cat_categorical
 #' @method vec_cast.character cat_categorical
 #' @export
 vec_cast.character.cat_categorical <- function(x,to,...) {
@@ -39,7 +42,7 @@ vec_cast.character.cat_categorical <- function(x,to,...) {
 }
 
 #' cast character to cat_categorical
-#'
+#' @inheritParams vec_cast.cat_categorical
 #' @method vec_cast.cat_categorical character
 #' @export
 vec_cast.cat_categorical.character <- function(x,to,...) {

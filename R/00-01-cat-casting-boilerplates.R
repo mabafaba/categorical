@@ -13,6 +13,11 @@
 #' @export
 #' @export vec_ptype2.cat_categorical
 vec_ptype2.cat_categorical <- function(x, y, ...) UseMethod("vec_ptype2.cat_categorical", y)
+
+#' default common type for cat_categorical
+#' @inheritParams vec_ptype2.cat_categorical
+#' @param x_arg x argument
+#' @param y_arg y argument
 vec_ptype2.cat_categorical.default <- function(x, y, ..., x_arg = "x", y_arg = "y") {
   vctrs::vec_default_ptype2(x, y, x_arg = x_arg, y_arg = y_arg)
 }
@@ -25,5 +30,9 @@ vec_ptype2.cat_categorical.default <- function(x, y, ..., x_arg = "x", y_arg = "
 #' @export
 #' @export vec_cast.cat_categorical
 vec_cast.cat_categorical <- function(x, to, ...) UseMethod("vec_cast.cat_categorical")
+
+#' cast categorical default
+#'
+#' @inheritParams vec_cast.cat_categorical
 vec_cast.cat_categorical.default <- function(x, to, ...) vctrs::vec_default_cast(x, to)
 

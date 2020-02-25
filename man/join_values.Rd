@@ -4,7 +4,10 @@
 \alias{join_values}
 \title{combine values of two categorical vectors}
 \usage{
-join_values(x, y, levels)
+join_values(x, y)
+}
+\arguments{
+\item{x, y}{categorical vectors}
 }
 \description{
 combine values of two categorical vectors
