@@ -1,9 +1,5 @@
 context("test-trailanderror")
-
-library(categorical)
-library(dplyr)
-library(testthat)
-
+#
 test_that('categorical()',{
 
 
@@ -14,7 +10,7 @@ test_that('categorical()',{
   expect_equal(length(categorical(list(list(1,2,3)))),1)
   expect_equal(length(categorical(NULL)),0)
   expect_equal(length(categorical(categorical(c(1,2,3)))),3)
-  is.categorical(categorical(NULL))
+  expect_true(is.categorical(categorical(NULL)))
 
   # na in input = NA in output
   expect_equal(is.na(categorical(c(NA,'A',NA))),c(T,F,T))
@@ -28,7 +24,7 @@ test_that('categorical()',{
 
 
 
-  expect_true(all(categorical(factor(1,0,1))==categorical(c("1","0","1"))))
+  expect_true(all(categorical(factor(c(1,0,1)))==categorical(c("1","0","1"))))
 
 })
 
