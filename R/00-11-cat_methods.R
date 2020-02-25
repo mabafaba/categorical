@@ -1,3 +1,8 @@
+#' @export
+levels.cat_categorical<-function(x){
+  attr(x,"levels")
+}
+
 
 #' table() for categorical vectors
 #'
