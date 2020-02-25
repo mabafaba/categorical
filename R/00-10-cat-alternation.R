@@ -50,7 +50,7 @@ alternate <- function(x,alternative = c(), internal = FALSE){
 
   }
 
-  x
+  get_active_values(x)
 }
 
 

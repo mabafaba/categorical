@@ -51,7 +51,6 @@ We might want easier-to-recognise names for the categories.
 We add an alternative value for each level that we will call "label"
 
 ```{r}
-# race <- mr_recode(race, AmIndian="A",Asian="B", Black="C", Pacific="D", White="E")
 
 race <- categorical(race,
             levels = c("A", "B","C","D","E"),
