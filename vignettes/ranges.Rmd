@@ -1,0 +1,159 @@
+---
+title: "Example extension of the categorical class: Ranges"
+author: "Martin Barner"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r, warning=FALSE,message=FALSE}
+library(categorical)
+library(dplyr)
+library(vctrs)
+data(soup)
+```
+
+The 'soup' dataset (taken from the 'ordinal package) contains age ranges (as factor levels:
+
+```{r}
+soup <- soup[,c('SOUPTYPE', 'AGEGROUP','COLD')]
+head(soup)
+```
+
+Ranges are quite complex as data types; they need two numbers to be defined, they have an order, but are more than just ordinal. We can use the 'alternative' level values to store and express this: 
+
+```{r}
+
+soup$AGEGROUP<- categorical(soup$AGEGROUP,
+                            levels =  c("18-30",
+                                        "31-40",
+                                        "41-50", "51-65"),
+                            alternatives = list(lower = c(18, 31, 41, 51),
+                                                upper = c(30,40,50,65))
+                            )
+
+head(soup)
+```
+
+the vector now has the numerical information of the range readily available:
+
+```{r}
+head( soup$AGEGROUP )
+head( alternate(soup$AGEGROUP,'lower') )
+head( alternate(soup$AGEGROUP,'upper') )
+
+table(
+  alternate(soup$AGEGROUP, 'lower') < 41,
+  soup$COLD
+)
+
+```
+
+That information is 'sticky' - we can treat `AGEGROUP` like any other simple vector: Store it in a data frame or tibble without additional hustle, subset the vector etc. without losing the extra infomration: 
+
+
+
+```{r}
+agegroup <- dplyr::filter(soup, SOUPTYPE!='Canned')$AGEGROUP
+
+agegroup <- agegroup[1:100]
+
+head( alternate(agegroup, 'lower') )
+
+```
+
+Let's filter for people under 41:
+
+```{r, warning=FALSE}
+soup %>% dplyr::filter(alternate(AGEGROUP,"lower") < 41 ) %>% head
+
+```
+
+
+This 'range' stuff seems like a useful vector type to have. Let's turn it into it's own class by adding a name for it to the categorical vector - we name it "cat_range".
+
+```{r}
+soup$AGEGROUP <- categorical(soup$AGEGROUP, class = "cat_range")
+class(soup$AGEGROUP)
+```
+
+We now have a new vector type called "cat_range", built ontop of "cat_categorical", which itself is built on the "record" type vector from the `vctrs` package.
+
+now we can define methods for it - for example to get the midpoint:
+```{r}
+range_midpoints<-function(x){
+  cbind(alternate(x, 'upper'),
+        alternate(x,'lower')
+        ) %>%
+          rowMeans
+}
+```
+
+
+and a generic function to calculate the mean - let's say by taking the mean of the midpoints:
+
+
+```{r}
+mean.cat_range<-function(x){
+  # take the mean of the rowwise means of upper and lower level
+  
+  mean(range_midpoints(x))
+  
+}
+
+soup %>%
+  group_by(SOUPTYPE) %>%
+  summarise(mean_age = mean(AGEGROUP))
+
+```
+
+It would be nice if we could use operators like `<` and `>`. We can achive this by providing the appropriate vctrs proxy functions (see `?browseVignettes('vctrs')` for details). Let's say that for numerical comparisons of ranges, generally the midpoint should be used (probably not the best idea but let's stick with this for simplicity)
+
+
+```{r}
+
+vec_proxy_compare.cat_range<-function(x){
+  range_midpoints(x)
+}
+  
+
+```
+
+This gives us a lot of functionality that relates to the 'numerical' component of the range type:
+
+```{r}
+
+soup$AGEGROUP[1]
+soup$AGEGROUP[100]
+soup$AGEGROUP[1] < soup$AGEGROUP[100]
+soup$AGEGROUP[1] > soup$AGEGROUP[100]
+soup$AGEGROUP[1] == soup$AGEGROUP[100]
+
+soup$AGEGROUP %>% sort %>% head
+
+min(soup$AGEGROUP)
+max(soup$AGEGROUP)
+
+```
+
+Adding a printing method to format the vector differently:
+
+```{r}
+print.cat_range <- function(x){
+  cat(paste0(alternate(x,'lower'),'..', alternate(x,'upper')))
+}
+
+soup$AGEGROUP[1:10]
+
+```
+

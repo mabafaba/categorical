@@ -14,24 +14,15 @@ vec_ptype2.cat_categorical.cat_categorical<-function(x,y,...){
   out_alternatives_internal<-join_alternatives(x,y,TRUE)
 
 
-  active_alt_x_name<-get_active_alternative_name(x)
-  active_alt_y_name<-get_active_alternative_name(y)
-  if(length(active_alt_y_name)==0){
-    out_active_alternative <- active_alt_x_name
-    out_active_alternative_is_internal <-   get_active_alternative_is_internal(x)
-  }else{
-    out_active_alternative <- active_alt_y_name
-    out_active_alternative_is_internal <-   FALSE
-  }
+  out_class <- unique(c(class(x),class(y)))
+  out_class <- out_class[! out_class %in% class(categorical())]
+
 
 
   new_categorical(matrix(logical(),nrow = 0,ncol = length(out_levels)),levels = out_levels,
                   alternatives_internal = out_alternatives_internal,
                   alternatives = out_alternatives,
-                  active_alternative = out_active_alternative,
-                  active_alternative_is_internal = out_active_alternative_is_internal
-
-                  # multiple_selection = out_multiple_selection
+                  class = out_class
   )
 }
 
@@ -59,25 +50,12 @@ vec_cast.cat_categorical.cat_categorical <- function(x,to,...) {
   out_alternatives_internal <- out_alternatives_internal[ level_order, ]
   out_alternatives <- out_alternatives[ level_order, ]
 
-  # out_multiple_selection<-has_multiple_response(x) | has_multiple_response(y)
-  active_alt_x_name<-get_active_alternative_name(x)
-  active_alt_to_name<-get_active_alternative_name(to)
-  if(length(active_alt_to_name)==0){
-    out_active_alternative <- active_alt_x_name
-    out_active_alternative_is_internal <-   get_active_alternative_is_internal(x)
-  }else{
-    out_active_alternative <- active_alt_to_name
-    out_active_alternative_is_internal <-   FALSE
-  }
-
 
 
   categorical(x = out_values,
               levels = out_levels,
               alternatives_internal = out_alternatives_internal,
               alternatives = out_alternatives,
-              active_alternative = out_active_alternative,
-              active_alternative_is_internal = out_active_alternative_is_internal,
               class = class(to)[!(class(to)%in%class(categorical()))]
   )
 

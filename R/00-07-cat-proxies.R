@@ -4,11 +4,11 @@
 
 vec_proxy_equal.cat_categorical<-function(x,...){
 
-  active<-get_active_values(x)
-  if(all(purrr::map_dbl(active, length)==1)){
-    return(unlist(active))
+  level<-get_level_values(x)
+  if(all(purrr::map_dbl(level, length)==1)){
+    return(unlist(level))
   }
-  return(active)
+  return(level)
 
 }
 

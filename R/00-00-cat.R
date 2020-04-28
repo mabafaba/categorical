@@ -25,8 +25,6 @@
 #' @param levels list of possible values for x; similar to factor levels
 #' @param alternatives a named list of vectors with alternative values corresponding to 'levels'. Must have the same length as levels. Can be accessed with \code{\link{alternate}}.
 #' @param alternatives_internal a named list of vectors with alternative values corresponding to 'levels'. Must have the same length as levels. Can be accessed with \code{alternate}. "internal" alternatives are used to store 'fixed' alternatives for classes extending 'cat_categorical'.
-#' @param active_alternative alternative to be used for display
-#' @param active_alternative_is_internal whether the active alternative is internal
 #' @param class optional: name the subclass if you are using this to define a new vector type on top of the 'cat_categorical' class
 #' @importFrom vctrs vec_ptype
 #' @importFrom vctrs vec_ptype2
@@ -38,8 +36,6 @@ categorical <- function(x = logical(),
                         levels = NULL,
                         alternatives = empty_alternatives(levels),
                         alternatives_internal = empty_alternatives(levels),
-                        active_alternative = NULL,
-                        active_alternative_is_internal = FALSE,
                         class = c()) {
   UseMethod("categorical")
 }
@@ -51,8 +47,6 @@ categorical <- function(x = logical(),
 new_categorical <- function(x = logical(), levels,
                             alternatives_internal = empty_alternatives(levels),
                             alternatives = empty_alternatives(levels),
-                            active_alternative = NULL,
-                            active_alternative_is_internal = FALSE,
                             class = c()) {
 
 
@@ -91,9 +85,6 @@ new_categorical <- function(x = logical(), levels,
                   levels = levels,
                   alternatives_internal = alternatives_internal,
                   alternatives = alternatives,
-                  active_alternative = active_alternative,
-                  active_alternative_is_internal = active_alternative_is_internal,
-                  # multiple_selection = multiple_selection,
                   class = c(class, "cat_categorical"))
 
 }
@@ -108,8 +99,6 @@ categorical.matrix<-function(x = logical(),
                              levels,
                              alternatives = empty_alternatives(levels),
                              alternatives_internal = empty_alternatives(levels),
-                             active_alternative = NULL,
-                             active_alternative_is_internal = FALSE,
                              class = c()){
 
   if(!is.matrix(x)){stop("x must be a matrix")}
@@ -177,8 +166,6 @@ categorical.matrix<-function(x = logical(),
                   levels = levels,
                   alternatives_internal = alternatives_internal,
                   alternatives = public_alternatives,
-                  active_alternative = active_alternative,
-                  active_alternative_is_internal = active_alternative_is_internal,
                   class = class)
 
 }
@@ -196,8 +183,6 @@ categorical.cat_categorical <- function(x = logical(),
                                         levels = NULL,
                                         alternatives = NULL,
                                         alternatives_internal = NULL,
-                                        active_alternative = NULL,
-                                        active_alternative_is_internal = FALSE,
                                         class = c()){
 
   if(is.null(levels)){
@@ -209,8 +194,6 @@ categorical.cat_categorical <- function(x = logical(),
                           levels=levels,
                           alternatives = alternatives,
                           alternatives_internal = alternatives_internal,
-                          active_alternative = active_alternative,
-                          active_alternative_is_internal = active_alternative_is_internal,
                           class = class)
 
 
@@ -223,8 +206,6 @@ categorical.default <- function(x = logical(),
                                 levels = unique_and_not_na(unlist(x)),
                                 alternatives = empty_alternatives(levels),
                                 alternatives_internal = empty_alternatives(levels),
-                                active_alternative = NULL,
-                                active_alternative_is_internal = FALSE,
                                 class = c()) {
 
   # if x is of length 0, we take a short cut (empty matrix if no levels provided, matrix with no rows and length(levels) columns if levels provided):
@@ -240,8 +221,6 @@ categorical.default <- function(x = logical(),
                               levels = levels,
                               alternatives = alternatives,
                               alternatives_internal = alternatives_internal,
-                              active_alternative = active_alternative,
-                              active_alternative_is_internal = active_alternative_is_internal,
                               class = class)
     )
 
@@ -279,8 +258,6 @@ categorical.default <- function(x = logical(),
                      levels = levels,
                      alternatives = alternatives,
                      alternatives_internal = alternatives_internal,
-                     active_alternative = active_alternative,
-                     active_alternative_is_internal = active_alternative_is_internal,
                      class)
 
 }
@@ -292,18 +269,18 @@ categorical.default <- function(x = logical(),
 as_categorical<-categorical
 
 
-#' find superficial NAs
-#' @param x a <categorical> vectors
-#' @details "superficial NA's" appear in categorical vectors where the levels themselves are not NA, but the active alternative has no value for the level
-superficial_nas<-function(x){
+# #' find superficial NAs
+# #' @param x a <categorical> vectors
+# #' @details "superficial NA's" appear in categorical vectors where the levels themselves are not NA, but the alternative has no value for the level
+# superficial_nas<-function(x){
 
-  active_values <-get_active_values(x)
-  level_values  <-get_level_values(x)
+#   active_values <-get_active_values(x)
+#   level_values  <-get_level_values(x)
 
-  superficial_nas<- is.na(active_values) & !is.na(level_values)
-  names(superficial_nas)<-level_values
-  return(superficial_nas)
-}
+#   superficial_nas<- is.na(active_values) & !is.na(level_values)
+#   names(superficial_nas)<-level_values
+#   return(superficial_nas)
+# }
 
 
 
@@ -367,11 +344,6 @@ categorical_logic<-function(x,...){
   unname(unlist(.data))
 }
 
-
-
-as.matrix.cat_categorical<-function(x){
-  do.call(cbind,x)
-}
 
 
 

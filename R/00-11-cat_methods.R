@@ -4,6 +4,18 @@ levels.cat_categorical<-function(x){
 }
 
 
+#' convert categorical to matrix
+#'
+#' @export
+as.matrix.cat_categorical<-function(x){
+  m<-do.call(cbind,x)
+  colnames(m)<-levels(x)
+  m
+}
+
+
+
+
 #' table() for categorical vectors
 #'
 #' @param x categorical vector

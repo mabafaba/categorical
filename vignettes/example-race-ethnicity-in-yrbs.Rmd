@@ -69,9 +69,16 @@ We can set the vector to display the alternative:
 ```{r}
 
 race <- alternate(race, 'label')
-head(race)
-
+cl_table(race)
 ```
+
+
+Default plotting changes depending on available packages (UpSetR):
+
+```{r}
+plot(race)
+```
+
 
 <!-- Now, Hispanic/Latino ethnicity is asked in a separate question. We convert it via the `as.mr` method for logical vectors, and then combine it with `race` -->
 
