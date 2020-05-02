@@ -16,7 +16,7 @@ alternatives<-function(x, internal = FALSE){
 
 
 
-get_alternative_level_values<-function(x, alternative, internal = FALSE){
+alternative_levels<-function(x, alternative, internal = FALSE){
 
   alts<-alternatives(x,internal = internal)
   if(!(alternative %in% names(alts))){stop(glue::glue('alternative "{alternative}" does not exist (for internal: {internal}); see list_alternatives()'))}
@@ -36,6 +36,8 @@ get_alternative_level_values<-function(x, alternative, internal = FALSE){
 
 #' get level values
 #' @param x categorical vector
+#' @details return the raw values of a categorical vector
+#' @return a vector with each records level if no multiple selection appears. Otherwise a list, each element containing all levels of one record.
 get_level_values<-function(x){
   values_as_logical_df <- x %>% unclass %>% do.call(cbind,.) %>%
     as.matrix %>%

@@ -1,0 +1,261 @@
+---
+title: "Custom categorical vector class"
+author: "M Barner"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Create your own categorical vector class (example: intervals)}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+  
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+collapse = TRUE,
+comment = "#>"
+)
+```
+  
+  
+## the categorical vector class structure
+
+Every categorical vector has the following attributes / characteristics:
+
+- a `levels` attribute denoting the unique values the vector can carry (similar to factor levels)
+- the levels must be an atomic vectors
+- any number of _alternative_ values corresponding to each level
+  - the _alternative_ values are split between regular _alternatives_ and _internal alternatives_ 
+  - _alternatives_ can be defined by the user; for example different labels for multiple languagues
+  - _internal alternatives_ are for alternatives standardised for subclasses (for example alternative `rank` for `ordinal` vectors)
+- each observation in the vector can consist of one or more of the levels, allowing the representation of multiple choice questions.
+  
+### New 'interval' class based on the 'categorical' vector class
+The 'categorical' vector type is designed to make it as easy and intuitive to create new vector classes. We show how this works with a 'interval' class as an example.
+
+As an example, we build a new kind of vector: a categorical `interval` vector with numerical lower and upper limits as they often appear in surveys.
+
+It can come (where appropriate) with customised methods:
+
+- arithmetics
+- logical operators (i.e. comparing two values with `>`, `<=` etc.)
+- conversion to other types (i.e. coersion to numeric with `as.numeric`)
+
+There is a smooth transition from simply using a `categorical` vector for your purposes to building a full vector class. We start with just using the 'categorical' class in place of .
+
+#### Informal Use
+```{r, warning=FALSE,message=FALSE}
+library(categorical)
+library(dplyr)
+library(vctrs)
+data(soup)
+```
+
+The 'soup' dataset (taken from the 'ordinal package) contains age intervals (as factor levels):
+
+```{r}
+soup <- soup[,c('SOUPTYPE', 'AGEGROUP','COLD')]
+head(soup)
+```
+
+
+Intervals are quite complex as data types; they need two numbers to be defined, they have an order, but are more than just ordinal. We can use the 'alternative' level values to store and express this: 
+
+```{r}
+
+soup$AGEGROUP<- categorical(soup$AGEGROUP,
+                            levels =  c("18-30",
+                                        "31-40",
+                                        "41-50", "51-65"),
+                            alternatives = list(lower = c(18, 31, 41, 51),
+                                                upper = c(30,40,50,65))
+)
+
+head(soup)
+```
+
+the vector now has the numerical information of the interval readily available:
+
+```{r}
+head( soup$AGEGROUP )
+head( alternate(soup$AGEGROUP,'lower') )
+head( alternate(soup$AGEGROUP,'upper') )
+
+table(
+  alternate(soup$AGEGROUP, 'lower') < 41,
+  soup$COLD
+)
+
+```
+
+That information is 'sticky' - we can treat `AGEGROUP` like any other simple vector: Store it in a data frame or tibble without additional hustle, subset the vector etc. without losing the extra infomration: 
+
+
+
+```{r}
+agegroup <- dplyr::filter(soup, SOUPTYPE!='Canned')$AGEGROUP
+
+agegroup <- agegroup[1:100]
+
+head( alternate(agegroup, 'lower') )
+
+```
+
+Let's filter for people under 41:
+
+```{r, warning=FALSE}
+soup %>% dplyr::filter(alternate(AGEGROUP,"lower") < 41 ) %>% head
+
+```
+
+#### Assigning class and Methods
+
+This 'interval' stuff seems like a useful vector type to have. Let's turn it into it's own class by giving it the name "cat_interval" when we create the categorical vector. We also want to use the internal alternative option for the limits because we consider them specific to the class we create (for example the attribute names may appear in the methods):
+
+```{r}
+soup$AGEGROUP<- categorical(soup$AGEGROUP,
+                            levels =  c("18-30", "31-40", "41-50", "51-65"),
+                            alternatives_internal = list(lower = c(18, 31, 41, 51),
+                                                upper = c(30,40,50,65)),
+                                                class= "cat_interval")
+
+
+class(soup$AGEGROUP)
+```
+
+
+
+We now have a new vector type called "cat_interval", built on top of "cat_categorical" (which itself is built on the "record" type vector from the `vctrs` package).  Let's build a function that generally lets us create `interval` type of vectors. It should extract the numbers for the upper and lower bounds and create the vector.
+
+```{r}
+# create 'interval' vector from characters of the form [0-9\.]*[-][0-9\.]* 
+interval <- function(x) {
+  # get levels:
+  levels <- sort(unique(x))
+  # extract numeric limits (defined below)
+  limits <- interval_limits_from_string(levels)
+  
+categorical(
+  x,
+  levels =  levels,
+  alternatives_internal = list(lower = limits["lower"],
+                      upper = limits["upper"]),
+  class = 'cat_interval'
+)
+}
+
+
+# helper function to get numeric interval limits from a character string  
+interval_limits_from_string <- function(x){
+  # split string on '-' symbol
+  x <- strsplit(x, '-')
+  # make sure each string was only split once
+  if (length(unlist(x)) != 2 * length(x)) {
+  stop('input format not correct, must be of the form 10-20, 10.1-20.2 or similar')
+  }
+
+  # convert to matrix:
+  limits <- do.call(rbind, x)
+  # convert to numeric
+  limits <- lapply(limits,as.numeric)
+  names(limits)<-c("lower","upper")
+  limits
+}
+
+# create the common as...  aliases:
+
+as.interval <- interval
+as_interval <- interval
+
+```
+
+Add a function to check whether a vector is of type `interval`:
+```{r}
+
+# Next we need a function to check whether a vector is of type 'interval':
+
+is.interval<-function(x){
+  return('cat_interval' %in% class(x))
+}
+```
+
+Now we can define methods for it - for example specific 'print' method that uses the alternative values. Since the alternatives we use are internal, we need to specify that in the `alternate` function.
+
+```{r}
+print.cat_interval <- function(x){
+  # print limits in paranthesis like this: (lower, upper)
+  cat(paste0('(', 
+             alternate(x,'lower',internal = TRUE),
+             ', ', 
+             alternate(x,'upper', internal = TRUE),
+             ')' 
+             ))
+}
+
+soup$AGEGROUP[1:3]
+
+```
+
+A method to get the midpoint:
+```{r}
+interval_midpoints<-function(x){
+  cbind(alternate(x, 'upper', internal = TRUE),
+        alternate(x,'lower', internal = TRUE)
+  ) %>%
+    rowMeans
+}
+```
+
+
+Or for example a generic function to calculate the mean - let's say for simplicity, by taking the mean of the midpoints:
+
+```{r}
+mean.cat_interval<-function(x){
+  # take the mean of the rowwise means of upper and lower level
+  
+  mean(interval_midpoints(x))
+  
+}
+
+soup %>%
+  group_by(SOUPTYPE) %>%
+  summarise(mean_age = mean(AGEGROUP))
+
+```
+
+#### 'vctrs' proxy methods 
+
+It would be nice if we could use operators like `<` and `>`. We can achive this by providing the appropriate vctrs proxy functions (see `?browseVignettes('vctrs')` for details). Let's say that for numerical comparisons of intervals, generally the midpoint should be used (probably not the best idea but let's stick with this for simplicity)
+
+
+```{r}
+
+vec_proxy_compare.cat_interval<-function(x){
+  interval_midpoints(x)
+}
+
+
+```
+
+This gives us a lot of functionality that relates to the 'numerical' component of the interval type:
+
+```{r}
+
+soup$AGEGROUP[1]
+soup$AGEGROUP[100]
+soup$AGEGROUP[1] < soup$AGEGROUP[100]
+soup$AGEGROUP[1] > soup$AGEGROUP[100]
+soup$AGEGROUP[1] == soup$AGEGROUP[100]
+
+soup$AGEGROUP %>% sort %>% head
+
+min(soup$AGEGROUP)
+max(soup$AGEGROUP)
+
+```
+
+
+#### Type conversions
+
+
+
+

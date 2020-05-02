@@ -2,8 +2,9 @@
 #' @S3method format cat_categorical
 #' @export
 format.cat_categorical<-function(x, ..., cat = FALSE) {
+  single_selection<-!any_multiple_selected(x)
   x<-get_level_values(x)
-  single_selection<-all(purrr::map_int(x,length)==1)
+
 
   paste0_keepNA<-function(...,collapse = NULL){
     topaste<-list(...)

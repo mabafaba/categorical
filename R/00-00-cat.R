@@ -269,18 +269,6 @@ categorical.default <- function(x = logical(),
 as_categorical<-categorical
 
 
-# #' find superficial NAs
-# #' @param x a <categorical> vectors
-# #' @details "superficial NA's" appear in categorical vectors where the levels themselves are not NA, but the alternative has no value for the level
-# superficial_nas<-function(x){
-
-#   active_values <-get_active_values(x)
-#   level_values  <-get_level_values(x)
-
-#   superficial_nas<- is.na(active_values) & !is.na(level_values)
-#   names(superficial_nas)<-level_values
-#   return(superficial_nas)
-# }
 
 
 

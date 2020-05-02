@@ -64,12 +64,12 @@ race <- categorical(race,
 
 ```
 
-We can set the vector to display the alternative:
+We can show the 'label' alternative:
 
 ```{r}
 
-race <- alternate(race, 'label')
-cl_table(race)
+alternate(race, 'label') %>% categorical %>% head
+
 ```
 
 

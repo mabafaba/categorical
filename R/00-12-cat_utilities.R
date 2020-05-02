@@ -27,3 +27,21 @@ enforce_alternative_lengths_match_levels<-function(alternatives,levels){
 
   stop("alternatives must be a list or a data.frame")
 }
+
+
+
+
+#' Does any record in a categorical vector have more than one item selected?
+#' @param x a vector
+#' @return TRUE if any record in a categorical vector has more than one item selected, FALSE otherwise.
+any_multiple_selected <- function(x){
+  if(!is.categorical(x)){stop("not a categorical vector")}
+  # if not all row sums in the logical matrix of x (excluding NA's) are 1, then at least some record has more or less than 1 record selected.
+  !all(rowSums(as.matrix(x[!is.na(x)]))==1)
+
+}
+
+
+
+
+

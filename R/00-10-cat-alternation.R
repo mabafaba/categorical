@@ -11,15 +11,30 @@
 alternate<-function(x,alternative = c(), internal = FALSE){
   if(length(alternative)==0){
     return(x)
-    }
-  alt_level_values <- get_alternative_level_values(x = x, alternative,internal)
-  return(alt_level_values[
-    match(
-      get_level_values(x),
-      levels(x)
+  }
+
+
+  alt_level_values <- alternative_levels(x = x, alternative,internal)
+  original_levels<-levels(x)
+  convert_values_to_alt<-function(vals){
+
+    alt_level_values[
+      match(
+        vals,
+        original_levels
       )
-    ]
-    )
+      ]
+  }
+
+  if(!any_multiple_selected(x)){
+    return(convert_values_to_alt(get_level_values(x)))
+  } else{
+    return(lapply(get_level_values(x),convert_values_to_alt))
+  }
+
+
+
+
 
 }
 
