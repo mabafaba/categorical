@@ -1,16 +1,15 @@
 
-#' cat_categorical is the main vector class. It gives a general structure from which the more specific categorical classes can be constructed.
+#' cat_categorical is the main vector class
 #' cat_categorical is:
 #'    - a standard vctrs_vctr vctrs_rcrd (see vctrs package), with a logical vector for each level, indicating which levels were selected for each entry
-#'    - the 'main' values are a character strings
+#'    - the 'main' values are character strings
 #'    - it has a 'levels' attribute with a vector containing all unique categories
 #'    - it has an attribute for _alternative values_, allowing the user to add different alternative values, such as labels in different languages
 #'    - it has an attribute for _internal alternative values_ intended for use in specific subclasses. What these are depends on the specific sublass; for example these could be:
 #'        - for an "interval" subclass: lower and upper limit
 #'        - for an "ordinal" subclass: integer rank
 
-#' it follows the generic methods to create categorical() vectors from different data types.
-#' for most types, we
+#' for most inputs, we
 #' - check if the inputs are valid
 #' - convert the input to a logical matrix
 #' - then use categorical.matrix(), which
@@ -144,11 +143,6 @@ categorical.matrix<-function(x = logical(),
                  paste(names(public_alternatives)[bad_length],collapse = " ")))
     }
   }
-
-
-
-
-
 
 
   # alternatives should always be(come) a tibble, and should always have as many rows as levels exist:
