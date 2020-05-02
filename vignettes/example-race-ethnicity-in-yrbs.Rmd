@@ -51,7 +51,6 @@ We might want easier-to-recognise names for the categories.
 We add an alternative value for each level that we will call "label"
 
 ```{r}
-# race <- mr_recode(race, AmIndian="A",Asian="B", Black="C", Pacific="D", White="E")
 
 race <- categorical(race,
             levels = c("A", "B","C","D","E"),
@@ -65,14 +64,21 @@ race <- categorical(race,
 
 ```
 
-We can set the vector to display the alternative:
+We can show the 'label' alternative:
 
 ```{r}
 
-race <- alternate(race, 'label')
-head(race)
+alternate(race, 'label') %>% categorical %>% head
 
 ```
+
+
+Default plotting changes depending on available packages (UpSetR):
+
+```{r}
+plot(race)
+```
+
 
 <!-- Now, Hispanic/Latino ethnicity is asked in a separate question. We convert it via the `as.mr` method for logical vectors, and then combine it with `race` -->
 

@@ -5,9 +5,7 @@
 \title{create a categorical variable from categorical input}
 \usage{
 \method{categorical}{cat_categorical}(x = logical(), levels = NULL,
-  alternatives = NULL, alternatives_internal = NULL,
-  active_alternative = NULL, active_alternative_is_internal = FALSE,
-  class = c())
+  alternatives = NULL, alternatives_internal = NULL, class = c())
 }
 \arguments{
 \item{x}{a categorical vector}
@@ -17,10 +15,6 @@
 \item{alternatives}{a named list of vectors with alternative values corresponding to 'levels'. Must have the same length as levels. Can be accessed with \code{\link{alternate}}.}
 
 \item{alternatives_internal}{a named list of vectors with alternative values corresponding to 'levels'. Must have the same length as levels. Can be accessed with \code{alternate}. "internal" alternatives are used to store 'fixed' alternatives for classes extending 'cat_categorical'.}
-
-\item{active_alternative}{alternative to be used for display}
-
-\item{active_alternative_is_internal}{whether the active alternative is internal}
 
 \item{class}{optional: name the subclass if you are using this to define a new vector type on top of the 'cat_categorical' class}
 }

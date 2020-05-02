@@ -7,9 +7,9 @@
 #' @S3method format cat_ordinal
 #' @export
 format.cat_ordinal<-function(x, ..., cat = FALSE) {
-  single_selection<-all(purrr::map_int(x,length)==1)
+  single_selection<-any_multiple_selected(x)
 
-  ranks<-alternate(x, 'ranks', internal = TRUE) %>% get_active_values
+  ranks<-alternate(x, 'ranks', internal = TRUE)
 
 
   x<-purrr::map(get_level_values(x),as.character)

@@ -37,7 +37,7 @@ vec_ptype2.character.cat_categorical<-function(x,y,...){
 #' @export
 vec_cast.character.cat_categorical <- function(x,to,...) {
 
-  as.character(get_active_values(x))
+  as.character(get_values(x))
 
 }
 
@@ -50,7 +50,7 @@ vec_cast.cat_categorical.character <- function(x,to,...) {
 
   x_values<- unique(x)
 
-  y_values<-get_active_alternative_level_values(y)
+  y_values<-get_level_values(y)
 
   y_levels<-levels(y)
   # set x levels to y levels where active values matched:
@@ -70,8 +70,8 @@ vec_cast.cat_categorical.character <- function(x,to,...) {
 # it requires a LOT of decisions about how casting behaves and it will take a lot of thought to make this work
 # without creating behaviour that is quietly different from what the user will expect.
 # to manage scope for now, categorical vectors must be in unalternated state in order to be casted.
-
+# NOTE UPDATE: alternation within vector no longer a thing
 assert_that_not_alternated<-function(x){
-  if(is_alternated(x)){stop("can't do this on alternated categorical vectors use unalternate or convert to other type first!")}
+  # if(is_alternated(x)){stop("can't do this on alternated categorical vectors use unalternate or convert to other type first!")}
 }
 
