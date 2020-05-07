@@ -23,48 +23,70 @@ library(tibble)
 
 ## features
 
-This package introduces a new Categorical vector type. With the following features:
+This package introduces a new categorical vector type with the following features:
 
-1. A fixed set of values called 'levels' (just like factors)
+1. A fixed set of values called 'levels' (like factors)
 2. each record in the vector can have more than one level 'selected' to allow storing multipe response survey data.
-3. Alternative values can be added for each level; you can switch back and forth between alternatives. Alternatives can be of any vector type.
-4. A second set of "internal" alternative values can be set, to make it easy to create new vector types from the categorical type.
+3. Alternative values can be added for each level. Alternatives can be of any vector type or class.
+4. A second set of "internal" alternative values can be set, to make it easy to extend the categorical class.
 
-### Levels
+### Example: Alternative levels
 
-### Alternative Levels
 
-let's store the days of the week as integer values 1-7, but include labels in two different languages, and another alternative value that defines whether the day is on the weekend or not:
+
+Say we have a vector of week days:
+
+```{r}
+set.seed(1)
+days <- sample(c('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'),
+       size = 15,
+       TRUE)
+days
+```
+
+We convert this to a "categorical" class where we:
+- keep all possible values (Monday - Friday) as levels
+- add a day number (1-7)
+- include labels in German
+- include whether the day is on the weekend or not
 
 ```{r}
 
-days <- categorical(c(1,2,1,5,6,3,7),
-                                levels=1:7,
-                                alternatives = list(
-                                  labels_english = c('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'),
-                                  labels_german = c('Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'),
-                                  is_weekend = c(FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE)
-                                )
-                                )
+days <- categorical(days,
+                    levels= c('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'),
+                    alternatives = list(
+                      day_number = 1:7,
+                      labels_german = c('Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'),
+                      is_weekend = c(FALSE, FALSE, FALSE, FALSE,  FALSE, TRUE, TRUE)
+                    )
+)
+days
 ```
 
 we can `alternate` between the original and alternative values:
 
 ```{r}
-alternate(days, "labels_english")
+alternate(days, "labels_german")
 alternate(days, "is_weekend")
 ```
 
-let's subset the vector to only keep the week days, then get their English labels:
+let's subset the vector to only keep the week days, then get their German labels:
 
 ```{r}
-alternate(days, "labels_english")[alternate(days, "is_weekend")]
+alternate(days, "labels_german")[alternate(days, "is_weekend")]
 ```
+
+Are the entries days after Tuesday (the second day)?
+```{r}
+alternate(days,"day_number") > 2
+
+```
+
 
 
 ### Multiple selection
 
-`categorical` vectors support _multiple selection_. That means that for each element of a vector, each level can be 'selected' or not selected: 
+`categorical` vectors support _multiple selection_. That means that for each element of a vector, each level can be 'selected' or not selected. Say we asked people to name their favourite colours, where they were allowed to select more than one:
 
 ```{r}
 # What are your favourite colours? (some people like more than one color, some even no colour at all!)
@@ -83,39 +105,9 @@ fav_colours
 
 We see that the second item has three colors selected, the last item none at all.
 
-Since we didn't specify the levels, they were set automatically to the unique values in the supplied list.
-Note that the levels correspond to all possible answers, not answer combinations:
+Since we didn't specify the levels, they were set automatically to the unique values in the supplied list:
 
 ```{r}
 levels(fav_colours)
-```
-
-### Ordinal class
-
-
-```{r}
-# colors ordered by wavelength
-my_lightwaves<-ordinal(x = c('red','infra','violet','blue','red', 'infra'),
-                levels = c('violet','blue','red', 'infra'),
-                alternatives = list(rank = c(1,2,3,4)))
-
-my_lightwaves
-
-```
-
-
-Ordinals as all categorical classes support multiple selection:
-
-```{r}
-my_lightwaves<-ordinal(x = list(c('red','infra'),
-                                c(),
-                                c('blue','red'),
-                                'infra'),
-                levels = c('violet','blue','red', 'infra'),
-                alternatives = list(rank = c(1,2,3,4)))
-
-
-
-my_lightwaves
 ```
 

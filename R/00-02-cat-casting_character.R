@@ -37,7 +37,7 @@ vec_ptype2.character.cat_categorical<-function(x,y,...){
 #' @export
 vec_cast.character.cat_categorical <- function(x,to,...) {
 
-  as.character(get_values(x))
+  as.character(get_level_values(x))
 
 }
 

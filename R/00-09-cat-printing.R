@@ -73,7 +73,7 @@ print.cat_categorical<-function(x, ...) {
     return(invisible(x))
     }
 
-  cat(format.cat_categorical(x,cat = FALSE), sep = " ") # using cat = FALSE to turn off colors to speed up printing
+  cat(format(x,cat = FALSE), sep = " ") # using cat = FALSE to turn off colors to speed up printing
   cat(paste0('\n',crayon::silver(levels_text)))
   invisible(x)
 }
@@ -101,7 +101,7 @@ obj_print_footer.cat_categorical<-function(x, ...) {
 #' @S3method obj_print_data cat_categorical
 #' @importFrom vctrs obj_print_data
 obj_print_data.cat_categorical<-function(x, ...) {
-  cat(format.cat_categorical(x,cat=TRUE), sep = "\n")
+  cat(format(x,cat=TRUE), sep = "\n")
   invisible(x)
 }
 
@@ -113,7 +113,7 @@ vec_ptype_abbr.cat_categorical <- function(x, ...) {
 }
 
 pillar_shaft.cat_categorical<- function(x, ...) {
-  out <- format.cat_categorical(x,cat= TRUE)
+  out <- format(x,cat= TRUE)
   out[is.na(x)] <- NA
   pillar::new_pillar_shaft_simple(out, align = "left", na_indent = 5)
 }
